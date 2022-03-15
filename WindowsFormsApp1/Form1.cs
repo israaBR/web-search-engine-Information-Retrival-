@@ -7,8 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data;
+//using System.Data;
 using System.Data.SqlClient;
+using System.Text.RegularExpressions;
+using System.IO;
+using System.Net;
 
 namespace WindowsFormsApp1
 {
@@ -42,9 +45,54 @@ namespace WindowsFormsApp1
             con.Open();
             SqlCommand cmd = con.CreateCommand();
             cmd.CommandText = "insert into url_data values ('" + url_text + "','" + url2_text + "')";
+
+            String Rstring;
+
+            WebRequest myWebRequest;
+            WebResponse myWebResponse;
+            String URL = url_text.Text;
+
+            myWebRequest = WebRequest.Create(URL);
+            myWebResponse = myWebRequest.GetResponse();//Returns a response from an Internet resource
+
+            Stream streamResponse = myWebResponse.GetResponseStream();//return the data stream from the internet
+                                                                      //and save it in the stream
+
+            StreamReader sreader = new StreamReader(streamResponse);//reads the data stream
+            Rstring = sreader.ReadToEnd();//reads it to the end
+            ISet<string> Links = GetContent(Rstring);//gets the links only
+
+
+            streamResponse.Close();
+            sreader.Close();
+            myWebResponse.Close();
+
+
+
+
+
+
+
             cmd.ExecuteNonQuery();
             con.Close();
             MessageBox.Show("added successfully");
+        }
+
+
+        private ISet<string> GetContent(String Rstring)
+        {
+            Regex regexLink = new Regex("(?<=<a\\s*?href=(?:'|\"))[^'\"]*?(?=(?:'|\"))");
+
+            ISet<string> newLinks = new HashSet<string>();
+            foreach (var match in regexLink.Matches(Rstring))
+            {
+                if (!newLinks.Contains(match.ToString()))
+                    newLinks.Add(match.ToString());
+            }
+
+            return newLinks;
+
+            
         }
     }
 }
