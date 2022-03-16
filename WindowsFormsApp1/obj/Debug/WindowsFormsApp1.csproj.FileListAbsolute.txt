@@ -25,3 +25,35 @@ C:\Users\Lenovo\Desktop\new\web-search-engine-Information-Retrival-\WindowsForms
 C:\Users\Lenovo\Desktop\new\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.CopyComplete
 C:\Users\Lenovo\Desktop\new\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe
 C:\Users\Lenovo\Desktop\new\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.pdb
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\database.mdf
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\database_log.ldf
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe.config
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.pdb
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\DialectSoftware.InteropServices.dll
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\DialectSoftware.Web.dll
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.AssemblyReference.cache
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.SuggestedBindingRedirects.cache
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form1.resources
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Properties.Resources.resources
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.GenerateResource.cache
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.CoreCompileInputs.cache
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.CopyComplete
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe
+F:\faculty\year four\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.pdb
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.AssemblyReference.cache
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.SuggestedBindingRedirects.cache
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form1.resources
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Properties.Resources.resources
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.GenerateResource.cache
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.CoreCompileInputs.cache
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.pdb
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\database.mdf
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\database_log.ldf
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe.config
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.pdb
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\DialectSoftware.InteropServices.dll
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\DialectSoftware.Web.dll
+F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.CopyComplete

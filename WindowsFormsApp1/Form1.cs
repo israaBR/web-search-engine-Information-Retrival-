@@ -18,8 +18,8 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
-        //change the DB Location if this doesn't work
-        private static SqlConnection con = new SqlConnection(@"F:\DATABASE.MDF");
+        //modify connection string if database is not working
+        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number;
@@ -61,7 +61,7 @@ namespace WindowsFormsApp1
                 String Rstring = get_URL_content(url_text.Text);
                 ISet<string> Links = GetContent(Rstring);//gets the links only?
                 //store it in database
-                store_URL_in_database(URL, Rstring);
+                //store_URL_in_database(URL, Rstring);
 
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
@@ -75,6 +75,7 @@ namespace WindowsFormsApp1
                 //check if extracted URLs are allowed
                 for (int i = 0; i < extractedURLs.Count; i++)
                 {
+                    //Console.WriteLine(extractedURLs[i]);///////
                     if (URL_is_allowed(extractedURLs[i]))
                     {
                         //normalize the URL
@@ -83,6 +84,20 @@ namespace WindowsFormsApp1
                         if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
                             toBeVisitedURLs.Enqueue(newURL);
                     }
+                }
+
+                for (int i = 0; i < Links.Count; i++)
+                {
+                    //Console.WriteLine(Links.First());///////////
+                    if (URL_is_allowed(Links.First()))
+                    {
+                        //normalize the URL
+                        String newURL = URL_normalization(Links.First());
+                        //check if exists in URLs to be visited or in database
+                        if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
+                            toBeVisitedURLs.Enqueue(newURL);
+                    }
+                    Links.Remove(Links.First());////////
                 }
 
                 //remove from currently visiting URLs and display URL in crawled URLs
@@ -294,8 +309,12 @@ namespace WindowsFormsApp1
             //get number of records in url_data table in database
             con.Open();
             SqlCommand cmd = con.CreateCommand();
+            Int32 count;
             cmd.CommandText = "select * from url_data";
-            Int32 count = (Int32)cmd.ExecuteScalar();
+            if (cmd.ExecuteScalar() != null)
+                count = (Int32)cmd.ExecuteScalar();
+            else
+                count = 0;
             con.Close();
             return count;
         }
