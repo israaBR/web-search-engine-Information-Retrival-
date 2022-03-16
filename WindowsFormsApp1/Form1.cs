@@ -18,10 +18,12 @@ namespace WindowsFormsApp1
 {
     public partial class Form1 : Form
     {
-        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
+        //change the DB Location if this doesn't work
+        private static SqlConnection con = new SqlConnection(@"F:\DATABASE.MDF");
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number;
+        String URLsFilePath;
         public Form1()
         {
             //initialize URL lists
@@ -29,7 +31,8 @@ namespace WindowsFormsApp1
             currentlyVisitingURLs = new List<String>();
             _BlockedUrls = new List<String>();
             crawled_documents_number = get_documents_number();
-            
+            URLsFilePath = @"c:\URLs";
+
             InitializeComponent();
         }
         private void textBox1_TextChanged(object sender, EventArgs e){ }
@@ -40,10 +43,13 @@ namespace WindowsFormsApp1
         private void crawel_button_Click(object sender, EventArgs e)
         {
             // crawling processing steps(Breadth-first)
-            // 1.get seed URL(when crawling starts first time)
-            // add to list of URLs to be visited
-            toBeVisitedURLs.Enqueue(url_text.Text);
-
+            //check if URLs file contains URLs from prevous crawling
+            if (!URLs_file_exist())
+            {
+                // 1.get seed URL(when crawling starts first time)
+                // add to list of URLs to be visited
+                toBeVisitedURLs.Enqueue(url_text.Text);
+            }
             while (toBeVisitedURLs.Count > 0)
             {
                 // get URL from to be visited and add it to currently visiting URLs
@@ -79,19 +85,32 @@ namespace WindowsFormsApp1
                     }
                 }
 
-                //display URL in crawled URLs
+                //remove from currently visiting URLs and display URL in crawled URLs
+                currentlyVisitingURLs.Remove(URL);
                 crawledURLs_txt.AppendText("/n"+URL);
                 crawled_documents_number++;
                 documentsNumber_txt.Clear();
                 documentsNumber_txt.AppendText(crawled_documents_number.ToString());
             }
 
-
         }
         private void pause_button_Click(object sender, EventArgs e)
         {
+            StreamWriter sw = new StreamWriter(URLsFilePath);
 
-        }        
+            // write URLs in currentlyVisiting list to the file
+            sw.WriteLine(currentlyVisitingURLs.Count);
+            for (int i = 0; i < currentlyVisitingURLs.Count; i++)
+                sw.Write(currentlyVisitingURLs[i]);
+            
+            // write URLs in toBeVisited queue to the file
+            sw.WriteLine(toBeVisitedURLs.Count);
+            for (int i = 0; i < toBeVisitedURLs.Count; i++)
+                sw.Write(toBeVisitedURLs.Dequeue());
+
+            sw.Close();
+            Application.Exit();
+        }
         
         private String get_URL_content(String URL)
         {
@@ -279,6 +298,26 @@ namespace WindowsFormsApp1
             Int32 count = (Int32)cmd.ExecuteScalar();
             con.Close();
             return count;
+        }
+        private bool URLs_file_exist()
+        {
+            // the file doesn't exist
+            if (!File.Exists(URLsFilePath))
+                return false;
+
+            StreamReader sr = new StreamReader(URLsFilePath);
+            // read URLs of currentlyVisiting list from the file
+            int currentlyCount = int.Parse(sr.ReadLine());
+            for (int i = 0; i < currentlyCount; i++)
+                currentlyVisitingURLs.Add(sr.ReadLine());
+
+            // read URLs of toBeVisited queue from the file
+            int toBeCount = int.Parse(sr.ReadLine());
+            for (int i = 0; i < toBeCount; i++)
+                toBeVisitedURLs.Enqueue(sr.ReadLine());
+
+            sr.Close();
+            return true;
         }
     }
 }
