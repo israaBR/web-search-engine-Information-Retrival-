@@ -19,16 +19,17 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
-        private List<String> visitedURLs, toBeVisitedURLs, currentlyVisitingURLs;
-        private static List<String> _BlockedUrls = new List<String>();
-
+        private Queue<String> toBeVisitedURLs;
+        private List<String> currentlyVisitingURLs, _BlockedUrls;
+        int crawled_documents_number;
         public Form1()
         {
             //initialize URL lists
-            visitedURLs = new List<String>();
-            toBeVisitedURLs = new List<String>();
+            toBeVisitedURLs = new Queue<String>();
             currentlyVisitingURLs = new List<String>();
-
+            _BlockedUrls = new List<String>();
+            crawled_documents_number = get_documents_number();
+            
             InitializeComponent();
         }
         private void textBox1_TextChanged(object sender, EventArgs e){ }
@@ -38,32 +39,60 @@ namespace WindowsFormsApp1
 
         private void crawel_button_Click(object sender, EventArgs e)
         {
-            con.Open();
-
-            // crawling processing steps
+            // crawling processing steps(Breadth-first)
             // 1.get seed URL(when crawling starts first time)
-            String seedURL = url_text.Text;
+            // add to list of URLs to be visited
+            toBeVisitedURLs.Enqueue(url_text.Text);
 
-            
-            // 2.fetch the document at the URL
-            String Rstring = get_URL_content(url_text.Text);
-            ISet<string> Links = GetContent(Rstring);//gets the links only
-
-            // 3.Parse the URL – HTML parser
-
-            // 4. Extract links from it to other docs (URLs)
+            while (toBeVisitedURLs.Count > 0)
+            {
+                // get URL from to be visited and add it to currently visiting URLs
+                String URL = toBeVisitedURLs.Dequeue();
+                currentlyVisitingURLs.Add(URL);
 
 
+                // 2.fetch the document at the URL
+                String Rstring = get_URL_content(url_text.Text);
+                ISet<string> Links = GetContent(Rstring);//gets the links only?
+                //store it in database
+                store_URL_in_database(URL, Rstring);
+
+                // 3.Parse the URL – HTML parser
+                // Extract links from it to other docs(URLs)
+                List<String> extractedURLs = HtmlParser(URL);
+
+                // 4.check if URL passes filter tests
+                // parse URL's Robot.txt file
+                _BlockedUrls.Clear();
+                parse_robots_file(URL);
+
+                //check if extracted URLs are allowed
+                for (int i = 0; i < extractedURLs.Count; i++)
+                {
+                    if (URL_is_allowed(extractedURLs[i]))
+                    {
+                        //normalize the URL
+                        String newURL = URL_normalization(extractedURLs[i]);
+                        //check if exists in URLs to be visited or in database
+                        if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
+                            toBeVisitedURLs.Enqueue(newURL);
+                    }
+                }
+
+                //display URL in crawled URLs
+                crawledURLs_txt.AppendText("/n"+URL);
+                crawled_documents_number++;
+                documentsNumber_txt.Clear();
+                documentsNumber_txt.AppendText(crawled_documents_number.ToString());
+            }
 
 
-
-            con.Close();
         }
         private void pause_button_Click(object sender, EventArgs e)
         {
 
-        }
-
+        }        
+        
         private String get_URL_content(String URL)
         {
             String Rstring;
@@ -94,7 +123,29 @@ namespace WindowsFormsApp1
             }
             return newLinks;
         }
-        
+        List<string> HtmlParser(string htmlDocument)
+        {
+            string head = string.Empty, title = string.Empty, Paragraph = string.Empty, link = string.Empty;
+            HTMLDocument hh = new HTMLDocument();
+            hh.write(htmlDocument);
+            IHTMLElementCollection ele = hh.links;
+
+            foreach (IHTMLElement e in ele)
+            {
+                link = (string)e.getAttribute("href", 0);
+                Paragraph = (string)e.getAttribute("p", 0);
+                title = (string)e.getAttribute("title", 0);
+                head = (string)e.getAttribute("head", 0);
+
+            }
+            List<string> arr = new List<string>();
+            arr.Add(head);
+            arr.Add(title);
+            arr.Add(Paragraph);
+            arr.Add(link);
+
+            return arr;
+        }
         private void parse_robots_file(String URL)
         {
             Uri CurrentURL = new Uri(URL);
@@ -211,6 +262,23 @@ namespace WindowsFormsApp1
             if (count > 0)
                 return true;
             return false;
+        }
+        private void store_URL_in_database(String URL, String document)
+        {
+            con.Open();
+            SqlCommand cmd = con.CreateCommand();
+            cmd.CommandText = "insert into url_data values ('" + URL + "','" + document + "')";
+            con.Close();
+        }
+        private int get_documents_number()
+        {
+            //get number of records in url_data table in database
+            con.Open();
+            SqlCommand cmd = con.CreateCommand();
+            cmd.CommandText = "select * from url_data";
+            Int32 count = (Int32)cmd.ExecuteScalar();
+            con.Close();
+            return count;
         }
     }
 }
