@@ -167,7 +167,7 @@ namespace WindowsFormsApp1
             foreach (IHTMLElement e in ele)
             {
                 link = (string)e.getAttribute("href", 0);
-                Paragraph = (string)e.getAttribute("p", 0);
+               // Paragraph = (string)e.getAttribute("p", 0);
                 title = (string)e.getAttribute("title", 0);
                 head = (string)e.getAttribute("head", 0);
 
@@ -175,7 +175,7 @@ namespace WindowsFormsApp1
             List<string> arr = new List<string>();
             arr.Add(head);
             arr.Add(title);
-            arr.Add(Paragraph);
+           // arr.Add(Paragraph);
             arr.Add(link);
 
             return arr;
