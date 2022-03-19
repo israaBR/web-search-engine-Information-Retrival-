@@ -19,7 +19,7 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         //modify connection string if database is not working
-        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
+        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True;Connect Timeout=30");
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number;
@@ -49,6 +49,9 @@ namespace WindowsFormsApp1
                 // 1.get seed URL(when crawling starts first time)
                 // add to list of URLs to be visited
                 toBeVisitedURLs.Enqueue(url_text.Text);
+                // parse URL's Robot.txt file
+                _BlockedUrls.Clear();
+                parse_robots_file(url_text.Text);
             }
             while (toBeVisitedURLs.Count > 0)
             {
@@ -60,35 +63,30 @@ namespace WindowsFormsApp1
                 // 2.fetch the document at the URL
                 String Rstring = get_URL_content(url_text.Text);
                 ISet<string> Links = GetContent(Rstring);//gets the links only?
-                //store it in database
-                //store_URL_in_database(URL, Rstring);
 
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
                 List<String> extractedURLs = HtmlParser(URL);
 
                 // 4.check if URL passes filter tests
-                // parse URL's Robot.txt file
-                _BlockedUrls.Clear();
-                parse_robots_file(URL);
+
 
                 //check if extracted URLs are allowed
-                for (int i = 0; i < extractedURLs.Count; i++)
-                {
-                    //Console.WriteLine(extractedURLs[i]);///////
-                    if (URL_is_allowed(extractedURLs[i]))
-                    {
-                        //normalize the URL
-                        String newURL = URL_normalization(extractedURLs[i]);
-                        //check if exists in URLs to be visited or in database
-                        if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
-                            toBeVisitedURLs.Enqueue(newURL);
-                    }
-                }
+                //for (int i = 0; i < extractedURLs.Count; i++)
+                //{
+                //    Console.WriteLine(extractedURLs[i]);///////
+                //    if (URL_is_allowed(extractedURLs[i]))
+                //    {
+                //        //normalize the URL
+                //        String newURL = URL_normalization(extractedURLs[i]);
+                //        //check if exists in URLs to be visited or in database
+                //        if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
+                //            toBeVisitedURLs.Enqueue(newURL);
+                //    }
+                //}
 
                 for (int i = 0; i < Links.Count; i++)
-                {
-                    //Console.WriteLine(Links.First());///////////
+                {                     
                     if (URL_is_allowed(Links.First()))
                     {
                         //normalize the URL
@@ -100,9 +98,11 @@ namespace WindowsFormsApp1
                     Links.Remove(Links.First());////////
                 }
 
+                //store it in database
+                store_URL_in_database(URL_normalization(URL), Rstring);
                 //remove from currently visiting URLs and display URL in crawled URLs
                 currentlyVisitingURLs.Remove(URL);
-                crawledURLs_txt.AppendText("/n"+URL);
+                crawledURLs_txt.AppendText(URL+"/r/n");
                 crawled_documents_number++;
                 documentsNumber_txt.Clear();
                 documentsNumber_txt.AppendText(crawled_documents_number.ToString());
@@ -157,17 +157,22 @@ namespace WindowsFormsApp1
             }
             return newLinks;
         }
-        List<string> HtmlParser(string htmlDocument)
+        List<string> HtmlParser(string Rstring)
         {
+            string html = Rstring;
+            object[] objects = { html };
+            mshtml.HTMLDocument doc = new HTMLDocument();
+            mshtml.IHTMLDocument2 doc2 = (IHTMLDocument2)doc;
+            doc2.write(objects);
             string head = string.Empty, title = string.Empty, Paragraph = string.Empty, link = string.Empty;
-            HTMLDocument hh = new HTMLDocument();
-            hh.write(htmlDocument);
-            IHTMLElementCollection ele = hh.links;
+            // HTMLDocument hh = new HTMLDocument();
+            // hh.write(Rstring);
+            IHTMLElementCollection ele = doc.links;
 
             foreach (IHTMLElement e in ele)
             {
                 link = (string)e.getAttribute("href", 0);
-               // Paragraph = (string)e.getAttribute("p", 0);
+                // Paragraph = (string)e.getAttribute("p", 0);
                 title = (string)e.getAttribute("title", 0);
                 head = (string)e.getAttribute("head", 0);
 
@@ -175,15 +180,16 @@ namespace WindowsFormsApp1
             List<string> arr = new List<string>();
             arr.Add(head);
             arr.Add(title);
-           // arr.Add(Paragraph);
+            // arr.Add(Paragraph);
             arr.Add(link);
 
             return arr;
         }
         private void parse_robots_file(String URL)
-        {
-            Uri CurrentURL = new Uri(URL);
-            string RobotsTxtFile = "http://" + CurrentURL.Authority + "/robots.txt";
+        {  
+            //string RobotsTxtFile = "http://" + URL + "/robots.txt";
+            string RobotsTxtFile = URL + "/robots.txt";
+
             string FileContents = get_URL_content(RobotsTxtFile);
             if (!String.IsNullOrEmpty(FileContents))
             {
@@ -229,9 +235,9 @@ namespace WindowsFormsApp1
             if (_BlockedUrls.Count == 0) return true;
 
             // Convert string into an Uri object to easily access the relative path excluding the host and domain etc.
-            Uri checkURL = new Uri(URL);
-            URL = checkURL.AbsolutePath.ToLower();
-
+            // Uri checkURL = new Uri(URL);
+            // URL = checkURL.AbsolutePath.ToLower();
+            URL.ToLower();
             if (URL == "/robots.txt")
             {
                 return false;
@@ -243,7 +249,7 @@ namespace WindowsFormsApp1
                 {
                     if (URL.Length >= blockedURL.Length)
                     {
-                        if (URL.Substring(0, blockedURL.Length) == blockedURL)
+                        if (URL.Equals(blockedURL))
                         {
                             // found a DISALLOW command
                             return false;
@@ -261,26 +267,32 @@ namespace WindowsFormsApp1
 
             // 2.remove '/' from the end of the URL
             if (finalURL[finalURL.Length - 1].Equals('/'))
-                finalURL.Remove(finalURL.Length - 1);
+                finalURL = finalURL.Remove(finalURL.Length - 1);
 
             // 3.removing 'www.' part if exists
             if (finalURL.Contains("www."))
-                finalURL.Replace("www.", "");
+                finalURL = finalURL.Replace("www.", "");
 
             // 4.remove fragment part'#' if exists
             int fragmentPosition = finalURL.IndexOf('#');
             if(fragmentPosition > 0) //fragment exists
-                finalURL = finalURL.Substring(0, fragmentPosition);
+                finalURL = finalURL = finalURL.Substring(0, fragmentPosition);
 
             // 5.remove default port(80 for http/ 443 for https)
             if (finalURL.Contains(":80"))
-                finalURL.Replace(":80", "");
-            if (finalURL.Contains(":443"))
-                finalURL.Replace(":443", "");
+                finalURL = finalURL.Replace(":80", "");
+            else if (finalURL.Contains(":443"))
+                finalURL = finalURL.Replace(":443", "");
 
-            // 6.remove 's' from 'https'
-            if (finalURL.Contains("https"))
-                finalURL.Replace("https", "http");
+            //// 6.remove 's' from 'https'
+            //if (finalURL.Contains("https"))
+            //    finalURL = finalURL.Replace("https", "http");
+
+            // 6.remove 'http/s' from the URL
+            if (finalURL.Contains("https:"))
+                finalURL = finalURL.Replace("https:", "");
+            else if (finalURL.Contains("http:"))
+                finalURL = finalURL.Replace("http:", "");
 
             return finalURL;
         }
@@ -288,9 +300,11 @@ namespace WindowsFormsApp1
         {
             //check if URL has been crawled already and stored in database
             con.Open();
+            int count = 0;
             SqlCommand cmd = con.CreateCommand();
             cmd.CommandText = "select * from url_data where url = '" + URL + "'";
-            Int32 count = (Int32)cmd.ExecuteScalar();
+            if (cmd.ExecuteScalar() != null)
+                count = (Int32)cmd.ExecuteScalar();
             con.Close(); 
 
             if (count > 0)
@@ -302,6 +316,7 @@ namespace WindowsFormsApp1
             con.Open();
             SqlCommand cmd = con.CreateCommand();
             cmd.CommandText = "insert into url_data values ('" + URL + "','" + document + "')";
+            cmd.ExecuteNonQuery();
             con.Close();
         }
         private int get_documents_number()
