@@ -62,29 +62,13 @@ namespace WindowsFormsApp1
 
                 // 2.fetch the document at the URL
                 String Rstring = get_URL_content(url_text.Text);
-                ISet<string> Links = GetContent(Rstring);//gets the links only?
 
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
-                List<String> extractedURLs = HtmlParser(URL);
+                ISet<string> Links = GetContent(Rstring);
 
                 // 4.check if URL passes filter tests
-
-
                 //check if extracted URLs are allowed
-                //for (int i = 0; i < extractedURLs.Count; i++)
-                //{
-                //    Console.WriteLine(extractedURLs[i]);///////
-                //    if (URL_is_allowed(extractedURLs[i]))
-                //    {
-                //        //normalize the URL
-                //        String newURL = URL_normalization(extractedURLs[i]);
-                //        //check if exists in URLs to be visited or in database
-                //        if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
-                //            toBeVisitedURLs.Enqueue(newURL);
-                //    }
-                //}
-
                 for (int i = 0; i < Links.Count; i++)
                 {                     
                     if (URL_is_allowed(Links.First()))
@@ -99,7 +83,7 @@ namespace WindowsFormsApp1
                 }
 
                 //store it in database
-                store_URL_in_database(URL_normalization(URL), Rstring);
+                store_URL_in_database(URL_normalization(URL));
                 //remove from currently visiting URLs and display URL in crawled URLs
                 currentlyVisitingURLs.Remove(URL);
                 crawledURLs_txt.AppendText(URL+"/r/n");
@@ -157,34 +141,35 @@ namespace WindowsFormsApp1
             }
             return newLinks;
         }
-        List<string> HtmlParser(string Rstring)
-        {
-            string html = Rstring;
-            object[] objects = { html };
-            mshtml.HTMLDocument doc = new HTMLDocument();
-            mshtml.IHTMLDocument2 doc2 = (IHTMLDocument2)doc;
-            doc2.write(objects);
-            string head = string.Empty, title = string.Empty, Paragraph = string.Empty, link = string.Empty;
-            // HTMLDocument hh = new HTMLDocument();
-            // hh.write(Rstring);
-            IHTMLElementCollection ele = doc.links;
 
-            foreach (IHTMLElement e in ele)
-            {
-                link = (string)e.getAttribute("href", 0);
-                // Paragraph = (string)e.getAttribute("p", 0);
-                title = (string)e.getAttribute("title", 0);
-                head = (string)e.getAttribute("head", 0);
+        //List<string> HtmlParser(string Rstring)
+        //{
+        //    string html = Rstring;
+        //    object[] objects = { html };
+        //    mshtml.HTMLDocument doc = new HTMLDocument();
+        //    mshtml.IHTMLDocument2 doc2 = (IHTMLDocument2)doc;
+        //    doc2.write(objects);
+        //    string head = string.Empty, title = string.Empty, Paragraph = string.Empty, link = string.Empty;
+        //    // HTMLDocument hh = new HTMLDocument();
+        //    // hh.write(Rstring);
+        //    IHTMLElementCollection ele = doc.links;
 
-            }
-            List<string> arr = new List<string>();
-            arr.Add(head);
-            arr.Add(title);
-            // arr.Add(Paragraph);
-            arr.Add(link);
+        //    foreach (IHTMLElement e in ele)
+        //    {
+        //        link = (string)e.getAttribute("href", 0);
+        //        // Paragraph = (string)e.getAttribute("p", 0);
+        //        title = (string)e.getAttribute("title", 0);
+        //        head = (string)e.getAttribute("head", 0);
 
-            return arr;
-        }
+        //    }
+        //    List<string> arr = new List<string>();
+        //    arr.Add(head);
+        //    arr.Add(title);
+        //    // arr.Add(Paragraph);
+        //    arr.Add(link);
+
+        //    return arr;
+        //}
         private void parse_robots_file(String URL)
         {  
             //string RobotsTxtFile = "http://" + URL + "/robots.txt";
@@ -311,10 +296,11 @@ namespace WindowsFormsApp1
                 return true;
             return false;
         }
-        private void store_URL_in_database(String URL, String document)
+        private void store_URL_in_database(String URL)
         {
             con.Open();
             SqlCommand cmd = con.CreateCommand();
+            String document = " ";
             cmd.CommandText = "insert into url_data values ('" + URL + "','" + document + "')";
             cmd.ExecuteNonQuery();
             con.Close();
