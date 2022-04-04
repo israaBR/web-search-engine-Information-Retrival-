@@ -65,7 +65,7 @@ namespace WindowsFormsApp1
 
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
-                ISet<string> Links = GetContent(Rstring);
+                List<String> Links = extract_links(Rstring);
 
                 // 4.check if URL passes filter tests
                 //check if extracted URLs are allowed
@@ -82,8 +82,12 @@ namespace WindowsFormsApp1
                     Links.Remove(Links.First());////////
                 }
 
+
+                //extract text
+                String text = extract_text(Rstring);
+
                 //store it in database
-                store_URL_in_database(URL_normalization(URL));
+                store_URL_in_database(URL_normalization(URL), text);
                 //remove from currently visiting URLs and display URL in crawled URLs
                 currentlyVisitingURLs.Remove(URL);
                 crawledURLs_txt.AppendText(URL+"/r/n");
@@ -117,6 +121,7 @@ namespace WindowsFormsApp1
             WebRequest myWebRequest;
             WebResponse myWebResponse;
 
+            
             myWebRequest = WebRequest.Create(URL);
             myWebResponse = myWebRequest.GetResponse();//Returns a response from an Internet resource
 
@@ -130,46 +135,28 @@ namespace WindowsFormsApp1
             myWebResponse.Close();
             return Rstring;
         }
-        private ISet<string> GetContent(String Rstring)
+
+        private List<String> extract_links(String rString)
         {
-            Regex regexLink = new Regex("(?<=<a\\s*?href=(?:'|\"))[^'\"]*?(?=(?:'|\"))");
-            ISet<string> newLinks = new HashSet<string>();
-            foreach (var match in regexLink.Matches(Rstring))
+            List<String> links = new List<String>();
+            IHTMLDocument2 myDoc = new HTMLDocumentClass();
+            myDoc.write(rString);
+            IHTMLElementCollection elements = myDoc.links;
+            foreach (IHTMLElement el in elements)
             {
-                if (!newLinks.Contains(match.ToString()))
-                    newLinks.Add(match.ToString());
+                links.Add((string)el.getAttribute("href", 0));
             }
-            return newLinks;
+            return links;
         }
+        private String extract_text(String rString)
+        {
+            String text = "";
+            IHTMLDocument2 myDoc = new HTMLDocumentClass();
+            myDoc.write(rString);
+            text = myDoc.body.innerText;
 
-        //List<string> HtmlParser(string Rstring)
-        //{
-        //    string html = Rstring;
-        //    object[] objects = { html };
-        //    mshtml.HTMLDocument doc = new HTMLDocument();
-        //    mshtml.IHTMLDocument2 doc2 = (IHTMLDocument2)doc;
-        //    doc2.write(objects);
-        //    string head = string.Empty, title = string.Empty, Paragraph = string.Empty, link = string.Empty;
-        //    // HTMLDocument hh = new HTMLDocument();
-        //    // hh.write(Rstring);
-        //    IHTMLElementCollection ele = doc.links;
-
-        //    foreach (IHTMLElement e in ele)
-        //    {
-        //        link = (string)e.getAttribute("href", 0);
-        //        // Paragraph = (string)e.getAttribute("p", 0);
-        //        title = (string)e.getAttribute("title", 0);
-        //        head = (string)e.getAttribute("head", 0);
-
-        //    }
-        //    List<string> arr = new List<string>();
-        //    arr.Add(head);
-        //    arr.Add(title);
-        //    // arr.Add(Paragraph);
-        //    arr.Add(link);
-
-        //    return arr;
-        //}
+            return text;
+        }
         private void parse_robots_file(String URL)
         {  
             //string RobotsTxtFile = "http://" + URL + "/robots.txt";
@@ -296,12 +283,11 @@ namespace WindowsFormsApp1
                 return true;
             return false;
         }
-        private void store_URL_in_database(String URL)
+        private void store_URL_in_database(String URL, String text)
         {
             con.Open();
             SqlCommand cmd = con.CreateCommand();
-            String document = " ";
-            cmd.CommandText = "insert into url_data values ('" + URL + "','" + document + "')";
+            cmd.CommandText = "insert into url_data values ('" + URL + "','" + text + "')";
             cmd.ExecuteNonQuery();
             con.Close();
         }
