@@ -19,7 +19,7 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         //modify connection string if database is not working
-        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True;Connect Timeout=30");
+        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True;Connect Timeout=30");
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number;
@@ -62,39 +62,51 @@ namespace WindowsFormsApp1
 
                 // 2.fetch the document at the URL
                 String Rstring = get_URL_content(url_text.Text);
-
+                bool lang = false;
+                foreach(var a in Rstring.Split(' '))
+                {
+                    if (a.Equals("lang=\"en\""))
+                    {
+                        lang = true;
+                        break;
+                    }
+                }
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
-                List<String> Links = extract_links(Rstring);
+                if (lang == true)
+                {
+                    List<String> Links = extract_links(Rstring);
 
-                // 4.check if URL passes filter tests
-                //check if extracted URLs are allowed
-                for (int i = 0; i < Links.Count; i++)
-                {                     
-                    if (URL_is_allowed(Links.First()))
+                    // 4.check if URL passes filter tests
+                    //check if extracted URLs are allowed
+                    for (int i = 0; i < Links.Count; i++)
                     {
-                        //normalize the URL
-                        String newURL = URL_normalization(Links.First());
-                        //check if exists in URLs to be visited or in database
-                        if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
-                            toBeVisitedURLs.Enqueue(newURL);
+                        if (URL_is_allowed(Links.First()))
+                        {
+                            //normalize the URL
+                            String newURL = URL_normalization(Links.First());
+                            //check if exists in URLs to be visited or in database
+                            if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
+                                toBeVisitedURLs.Enqueue(newURL);
+                        }
+                        Links.Remove(Links.First());////////
                     }
-                    Links.Remove(Links.First());////////
+
+
+                    //extract text
+                    String text = extract_text(Rstring);
+
+                    //store it in database
+                    store_URL_in_database(URL_normalization(URL), text);
+                    //remove from currently visiting URLs and display URL in crawled URLs
+                    currentlyVisitingURLs.Remove(URL);
+                    crawledURLs_txt.AppendText(URL + "/r/n");
+                    crawled_documents_number++;
+                    documentsNumber_txt.Clear();
+                    documentsNumber_txt.AppendText(crawled_documents_number.ToString());
                 }
-
-
-                //extract text
-                String text = extract_text(Rstring);
-
-                //store it in database
-                store_URL_in_database(URL_normalization(URL), text);
-                //remove from currently visiting URLs and display URL in crawled URLs
-                currentlyVisitingURLs.Remove(URL);
-                crawledURLs_txt.AppendText(URL+"/r/n");
-                crawled_documents_number++;
-                documentsNumber_txt.Clear();
-                documentsNumber_txt.AppendText(crawled_documents_number.ToString());
             }
+                
 
         }
         private void pause_button_Click(object sender, EventArgs e)
