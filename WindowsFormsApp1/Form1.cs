@@ -90,21 +90,21 @@ namespace WindowsFormsApp1
                         //}
                         Links.Remove(Links.First());////////
                     }
-                //if (lang == true)
-               // {
+                if (lang == true)
+                {
                     //extract text
-                    String text = extract_text(Rstring);
+                   // String text = extract_text(Rstring);
 
                     //store it in database
-                    store_URL_in_database(URL_normalization(URL), text);
+                    store_URL_in_database(URL_normalization(URL), "");
                     //remove from currently visiting URLs and display URL in crawled URLs
                     currentlyVisitingURLs.Remove(URL);
                     crawledURLs_txt.AppendText(URL + "\r\n");
                     crawled_documents_number++;
                     documentsNumber_txt.Clear();
                     documentsNumber_txt.AppendText(crawled_documents_number.ToString());
-                //}
-                //Console.WriteLine(URL);
+                }
+                Console.WriteLine(URL);
             }
              
 
@@ -300,7 +300,7 @@ namespace WindowsFormsApp1
         {
             con.Open();
             SqlCommand cmd = con.CreateCommand();
-            cmd.CommandText = "insert into url_data values ('" + URL + "','" + text + "')";
+            cmd.CommandText = "insert into url_data(url) values ('" + URL + "')";
             cmd.ExecuteNonQuery();
             con.Close();
         }
