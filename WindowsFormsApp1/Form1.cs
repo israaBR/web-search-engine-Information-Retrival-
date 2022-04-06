@@ -19,7 +19,7 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         //modify connection string if database is not working
-        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True;Connect Timeout=30");
+        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number;
@@ -51,8 +51,10 @@ namespace WindowsFormsApp1
                 toBeVisitedURLs.Enqueue(url_text.Text);
                 // parse URL's Robot.txt file
                 _BlockedUrls.Clear();
-                parse_robots_file(url_text.Text);
+                //parse_robots_file(url_text.Text);
             }
+
+            // 2.fetch the document at the URL
             while (toBeVisitedURLs.Count > 0)
             {
                 // get URL from to be visited and add it to currently visiting URLs
@@ -60,7 +62,6 @@ namespace WindowsFormsApp1
                 currentlyVisitingURLs.Add(URL);
 
 
-                // 2.fetch the document at the URL
                 String Rstring = get_URL_content(url_text.Text);
                 bool lang = false;
                 foreach(var a in Rstring.Split(' '))
@@ -73,26 +74,24 @@ namespace WindowsFormsApp1
                 }
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
-                if (lang == true)
-                {
-                    List<String> Links = extract_links(Rstring);
+                 List<String> Links = extract_links(Rstring);
 
                     // 4.check if URL passes filter tests
                     //check if extracted URLs are allowed
                     for (int i = 0; i < Links.Count; i++)
                     {
-                        if (URL_is_allowed(Links.First()))
-                        {
+                        //if (URL_is_allowed(Links.First()))
+                        //{
                             //normalize the URL
                             String newURL = URL_normalization(Links.First());
                             //check if exists in URLs to be visited or in database
                             if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
                                 toBeVisitedURLs.Enqueue(newURL);
-                        }
+                        //}
                         Links.Remove(Links.First());////////
                     }
-
-
+                //if (lang == true)
+               // {
                     //extract text
                     String text = extract_text(Rstring);
 
@@ -100,51 +99,53 @@ namespace WindowsFormsApp1
                     store_URL_in_database(URL_normalization(URL), text);
                     //remove from currently visiting URLs and display URL in crawled URLs
                     currentlyVisitingURLs.Remove(URL);
-                    crawledURLs_txt.AppendText(URL + "/r/n");
+                    crawledURLs_txt.AppendText(URL + "\r\n");
                     crawled_documents_number++;
                     documentsNumber_txt.Clear();
                     documentsNumber_txt.AppendText(crawled_documents_number.ToString());
-                }
+                //}
+                //Console.WriteLine(URL);
             }
-                
+             
 
         }
-        private void pause_button_Click(object sender, EventArgs e)
-        {
-            StreamWriter sw = new StreamWriter(URLsFilePath);
+        //private void pause_button_Click(object sender, EventArgs e)
+        //{
+        //    StreamWriter sw = new StreamWriter(URLsFilePath);
 
-            // write URLs in currentlyVisiting list to the file
-            sw.WriteLine(currentlyVisitingURLs.Count);
-            for (int i = 0; i < currentlyVisitingURLs.Count; i++)
-                sw.Write(currentlyVisitingURLs[i]);
+        //    // write URLs in currentlyVisiting list to the file
+        //    sw.WriteLine(currentlyVisitingURLs.Count);
+        //    for (int i = 0; i < currentlyVisitingURLs.Count; i++)
+        //        sw.Write(currentlyVisitingURLs[i]);
             
-            // write URLs in toBeVisited queue to the file
-            sw.WriteLine(toBeVisitedURLs.Count);
-            for (int i = 0; i < toBeVisitedURLs.Count; i++)
-                sw.Write(toBeVisitedURLs.Dequeue());
+        //    // write URLs in toBeVisited queue to the file
+        //    sw.WriteLine(toBeVisitedURLs.Count);
+        //    for (int i = 0; i < toBeVisitedURLs.Count; i++)
+        //        sw.Write(toBeVisitedURLs.Dequeue());
 
-            sw.Close();
-            Application.Exit();
-        }
+        //    sw.Close();
+        //    Application.Exit();
+        //}
         
         private String get_URL_content(String URL)
         {
-            String Rstring;
+            String Rstring = String.Empty;
             WebRequest myWebRequest;
             WebResponse myWebResponse;
 
             
             myWebRequest = WebRequest.Create(URL);
-            myWebResponse = myWebRequest.GetResponse();//Returns a response from an Internet resource
 
-            Stream streamResponse = myWebResponse.GetResponseStream();//return the data stream from the internet and save it in the stream
+                myWebResponse = myWebRequest.GetResponse();//Returns a response from an Internet resource
+                Stream streamResponse = myWebResponse.GetResponseStream();//return the data stream from the internet and save it in the stream
+                StreamReader sreader = new StreamReader(streamResponse);//reads the data stream
+                Rstring = sreader.ReadToEnd();//reads it to the end
 
-            StreamReader sreader = new StreamReader(streamResponse);//reads the data stream
-            Rstring = sreader.ReadToEnd();//reads it to the end
+                streamResponse.Close();
+                sreader.Close();
+                myWebResponse.Close();
 
-            streamResponse.Close();
-            sreader.Close();
-            myWebResponse.Close();
+
             return Rstring;
         }
 
