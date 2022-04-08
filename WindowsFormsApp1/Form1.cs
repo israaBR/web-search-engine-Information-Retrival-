@@ -51,7 +51,7 @@ namespace WindowsFormsApp1
                 toBeVisitedURLs.Enqueue(url_text.Text);
                 // parse URL's Robot.txt file
                 _BlockedUrls.Clear();
-                //parse_robots_file(url_text.Text);
+                parse_robots_file(url_text.Text);
             }
 
             // 2.fetch the document at the URL
@@ -80,20 +80,20 @@ namespace WindowsFormsApp1
                     //check if extracted URLs are allowed
                     for (int i = 0; i < Links.Count; i++)
                     {
-                        //if (URL_is_allowed(Links.First()))
-                        //{
+                        if (URL_is_allowed(Links.First()))
+                        {
                             //normalize the URL
                             String newURL = URL_normalization(Links.First());
                             //check if exists in URLs to be visited or in database
                             if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
                                 toBeVisitedURLs.Enqueue(newURL);
-                        //}
+                        }
                         Links.Remove(Links.First());////////
                     }
                 if (lang == true)
                 {
                     //extract text
-                   // String text = extract_text(Rstring);
+                    //String text = extract_text(Rstring);
 
                     //store it in database
                     store_URL_in_database(URL_normalization(URL), "");
@@ -109,24 +109,24 @@ namespace WindowsFormsApp1
              
 
         }
-        //private void pause_button_Click(object sender, EventArgs e)
-        //{
-        //    StreamWriter sw = new StreamWriter(URLsFilePath);
+        private void pause_button_Click(object sender, EventArgs e)
+        {
+            StreamWriter sw = new StreamWriter(URLsFilePath);
 
-        //    // write URLs in currentlyVisiting list to the file
-        //    sw.WriteLine(currentlyVisitingURLs.Count);
-        //    for (int i = 0; i < currentlyVisitingURLs.Count; i++)
-        //        sw.Write(currentlyVisitingURLs[i]);
-            
-        //    // write URLs in toBeVisited queue to the file
-        //    sw.WriteLine(toBeVisitedURLs.Count);
-        //    for (int i = 0; i < toBeVisitedURLs.Count; i++)
-        //        sw.Write(toBeVisitedURLs.Dequeue());
+            // write URLs in currentlyVisiting list to the file
+            sw.WriteLine(currentlyVisitingURLs.Count);
+            for (int i = 0; i < currentlyVisitingURLs.Count; i++)
+                sw.Write(currentlyVisitingURLs[i]);
 
-        //    sw.Close();
-        //    Application.Exit();
-        //}
-        
+            // write URLs in toBeVisited queue to the file
+            sw.WriteLine(toBeVisitedURLs.Count);
+            for (int i = 0; i < toBeVisitedURLs.Count; i++)
+                sw.Write(toBeVisitedURLs.Dequeue());
+
+            sw.Close();
+            Application.Exit();
+        }
+
         private String get_URL_content(String URL)
         {
             String Rstring = String.Empty;
@@ -300,7 +300,8 @@ namespace WindowsFormsApp1
         {
             con.Open();
             SqlCommand cmd = con.CreateCommand();
-            cmd.CommandText = "insert into url_data(url) values ('" + URL + "')";
+            // cmd.CommandText = "insert into url_data values ('" + URL + "', '"+ text+ "')";
+            cmd.CommandText = "insert into url_data (url) values ('" + URL + "')";
             cmd.ExecuteNonQuery();
             con.Close();
         }
