@@ -40,6 +40,28 @@ namespace WindowsFormsApp1
         private void label3_Click(object sender, EventArgs e){ }
 
 
+        /// <summary>
+        /// Indexer Functions
+        /// </summary>
+        private void indexingButton_Click(object sender, EventArgs e)
+        {
+
+        }
+
+
+        private String extract_text(String rString)
+        {
+            String text = "";
+            IHTMLDocument2 myDoc = new HTMLDocumentClass();
+            myDoc.write(rString);
+            text = myDoc.body.innerText;
+            return text;
+        }
+
+
+        /// <summary>
+        /// Crawler Functions
+        /// </summary>
         private void crawel_button_Click(object sender, EventArgs e)
         {
             // crawling processing steps(Breadth-first)
@@ -64,7 +86,7 @@ namespace WindowsFormsApp1
 
                 String Rstring = get_URL_content(url_text.Text);
                 bool lang = false;
-                foreach(var a in Rstring.Split(' '))
+                foreach (var a in Rstring.Split(' '))
                 {
                     if (a.Equals("lang=\"en\""))
                     {
@@ -74,22 +96,22 @@ namespace WindowsFormsApp1
                 }
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
-                 List<String> Links = extract_links(Rstring);
+                List<String> Links = extract_links(Rstring);
 
-                    // 4.check if URL passes filter tests
-                    //check if extracted URLs are allowed
-                    for (int i = 0; i < Links.Count; i++)
+                // 4.check if URL passes filter tests
+                //check if extracted URLs are allowed
+                for (int i = 0; i < Links.Count; i++)
+                {
+                    if (URL_is_allowed(Links.First()))
                     {
-                        if (URL_is_allowed(Links.First()))
-                        {
-                            //normalize the URL
-                            String newURL = URL_normalization(Links.First());
-                            //check if exists in URLs to be visited or in database
-                            if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
-                                toBeVisitedURLs.Enqueue(newURL);
-                        }
-                        Links.Remove(Links.First());////////
+                        //normalize the URL
+                        String newURL = URL_normalization(Links.First());
+                        //check if exists in URLs to be visited or in database
+                        if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
+                            toBeVisitedURLs.Enqueue(newURL);
                     }
+                    Links.Remove(Links.First());////////
+                }
                 if (lang == true)
                 {
                     //extract text
@@ -106,8 +128,6 @@ namespace WindowsFormsApp1
                 }
                 Console.WriteLine(URL);
             }
-             
-
         }
         private void pause_button_Click(object sender, EventArgs e)
         {
@@ -126,7 +146,6 @@ namespace WindowsFormsApp1
             sw.Close();
             Application.Exit();
         }
-
         private String get_URL_content(String URL)
         {
             String Rstring = String.Empty;
@@ -148,7 +167,6 @@ namespace WindowsFormsApp1
 
             return Rstring;
         }
-
         private List<String> extract_links(String rString)
         {
             List<String> links = new List<String>();
@@ -160,15 +178,6 @@ namespace WindowsFormsApp1
                 links.Add((string)el.getAttribute("href", 0));
             }
             return links;
-        }
-        private String extract_text(String rString)
-        {
-            String text = "";
-            IHTMLDocument2 myDoc = new HTMLDocumentClass();
-            myDoc.write(rString);
-            text = myDoc.body.innerText;
-
-            return text;
         }
         private void parse_robots_file(String URL)
         {  
@@ -300,8 +309,8 @@ namespace WindowsFormsApp1
         {
             con.Open();
             SqlCommand cmd = con.CreateCommand();
-            // cmd.CommandText = "insert into url_data values ('" + URL + "', '"+ text+ "')";
-            cmd.CommandText = "insert into url_data (url) values ('" + URL + "')";
+            //cmd.CommandText = "insert into url_data values ('" + URL + "', '"+ text+ "');";
+            cmd.CommandText = "insert into url_data (url) values ('" + URL + "');";
             cmd.ExecuteNonQuery();
             con.Close();
         }
