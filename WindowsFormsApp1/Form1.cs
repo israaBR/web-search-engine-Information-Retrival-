@@ -328,6 +328,12 @@ namespace WindowsFormsApp1
             con.Close();
             return count;
         }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
         private bool URLs_file_exist()
         {
             // the file doesn't exist
@@ -347,6 +353,38 @@ namespace WindowsFormsApp1
 
             sr.Close();
             return true;
+        }
+        //split page content into words
+        List<string> tokenize(string page_text)
+        {
+            //store words from page content after tokenize
+            List<string> list = new List<string>();
+            string word = "";
+            int i = 0;
+            foreach (char ch in page_text)
+            {
+                i++;
+                if (ch == ' ' || ch == ',' || ch == ';' || ch == '/' || ch == '?')
+                {
+                    if (!word.Equals(""))
+                    {
+                        list.Add(word);
+                        word = "";
+                    }
+
+                }
+                else
+                {
+                    word += ch;
+                }
+                //if last char in page content
+                if (i == page_text.Length)
+                {
+                    list.Add(word);
+                    break;
+                }
+            }
+            return list;
         }
     }
 }
