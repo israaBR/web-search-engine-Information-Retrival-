@@ -386,5 +386,17 @@ namespace WindowsFormsApp1
             }
             return list;
         }
+        private string Remove_Punctuation(string text)
+        {
+            var sb = new StringBuilder();
+            foreach (char c in text)
+            {
+                if (!char.IsPunctuation(c))
+                    sb.Append(c);
+            }
+            string str = sb.ToString();
+
+            return str.ToLower();
+        }
     }
 }
