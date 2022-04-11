@@ -386,6 +386,65 @@ namespace WindowsFormsApp1
             }
             return list;
         }
+        
+       private string remove_stopWords(string text)
+        {
+            
+
+            var words_to_remove = new HashSet<string> {"this","that","with","myself","a", "an","the","able", "about", "above", "abst", "accordance", "according",  "accordingly",
+  "across",  "act", "actually", "added", "adj",  "affected",
+  "affecting",  "affects",  "after", "afterwards",
+  "again",  "against",  "ah",  "all",  "almost",  "alone",
+  "along",  "already",  "also",  "although", "always",  "am",  "among",  "amongst",  "an","and",
+  "announce","another","any","anybody","anyhow","anymore",  "anyone",
+  "anything",  "anyway","anyways","anywhere","apparently","approximately","are","aren","arent", "arise",
+  "around", "as", "aside", "ask","asking",
+  "at", "auth", "available", "away", "awfully", "b","back", "be", "became", "because", "become","becomes",
+  "becoming","been", "before", "beforehand", "begin", "beginning", "beginnings", "begins",
+  "behind", "being","believe",  "below", "beside","besides",  "between",
+  "beyond", "biol", "both",  "brief",  "briefly",  "but",  "by",  "c",  "ca",
+  "came",  "can",  "cannot",  "can't",  "cause",  "causes","certain",  "certainly",  "com",
+  "come",  "comes",  "contain",  "containing",  "contains",  "could",  "couldnt",  "d",  "date",  "did", "didn't",
+  "different", "do",  "does",  "doesn't",  "doing",  "done",  "don't",  "down",  "downwards",  "due",  "during",
+  "e",  "each",  "ed",  "edu",  "effect", "eg",  "eight", "eighty",  "either",  "else",
+ "elsewhere",  "end",  "ending",  "enough",  "especially",  "et",  "et-al", "etc",  "even",
+  "ever",  "every",  "everybody",  "everyone",  "everything",  "everywhere",  "ex",  "except",  "f",  "far", "few",  "ff",  "fifth","first",
+  "five", "fix", "followed", "following","follows", "for",
+  "former",  "formerly", "forth", "found",  "four",  "from",  "further",  "furthermore",  "g",  "gave", "get",  "gets", "getting", "give",  "given", "gives",
+  "giving",  "go","goes",  "gone",  "got",  "gotten", "h",  "had",  "happens", "hardly",
+  "has", "hasn't",
+  "have", "haven't", "having", "he", "hed", "hence", "her","here","hereafter",
+  "hereby",  "herein", "heres", "hereupon", "hers","herself",
+ "hes","his", "hither", "how", "howbeit", "however","hundred",
+ "in",  "inc" ,"indeed", "index", "information",  "instead",
+  "into",  "invention", "inward","is",  "it'll",
+  "its",  "itself", "i've",
+  "j",  "just",  "k",  "keep	keeps",  "kept",  "kg",  "km",
+  };
+
+            string output = string.Join(
+                " ",
+                text
+                    .Split(new[] { ' ', '\t', '\n', '\r' ,'.','!','?',':','/' })
+                    .Where(word => !words_to_remove.Contains(word))
+            );
+
+            return output;
+        }
+        string []copyOfText;
+        private string stemming (string unstemmed)
+        {
+            copyOfText= unstemmed.Split(' ');
+            var stemmer = new EnglishPorter2Stemmer();
+            var stemmed = stemmer.Stem(unstemmed).Value;
+            return stemmed;
+        }
+
+        private void pauseIndexing_Click(object sender, EventArgs e)
+        {
+
+        }
+
         private string Remove_Punctuation(string text)
         {
             var sb = new StringBuilder();
