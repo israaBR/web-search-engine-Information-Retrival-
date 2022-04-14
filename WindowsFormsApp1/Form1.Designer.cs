@@ -43,20 +43,20 @@
             // 
             // url_text
             // 
-            this.url_text.Location = new System.Drawing.Point(11, 19);
-            this.url_text.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.url_text.Location = new System.Drawing.Point(15, 23);
+            this.url_text.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.url_text.Multiline = true;
             this.url_text.Name = "url_text";
-            this.url_text.Size = new System.Drawing.Size(213, 27);
+            this.url_text.Size = new System.Drawing.Size(283, 32);
             this.url_text.TabIndex = 0;
             this.url_text.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // crawel_button
             // 
-            this.crawel_button.Location = new System.Drawing.Point(11, 59);
-            this.crawel_button.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.crawel_button.Location = new System.Drawing.Point(15, 73);
+            this.crawel_button.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.crawel_button.Name = "crawel_button";
-            this.crawel_button.Size = new System.Drawing.Size(102, 27);
+            this.crawel_button.Size = new System.Drawing.Size(136, 33);
             this.crawel_button.TabIndex = 2;
             this.crawel_button.Text = "crawel!";
             this.crawel_button.UseVisualStyleBackColor = true;
@@ -64,76 +64,74 @@
             // 
             // pause_button
             // 
-            this.pause_button.Location = new System.Drawing.Point(117, 59);
-            this.pause_button.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.pause_button.Location = new System.Drawing.Point(156, 73);
+            this.pause_button.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pause_button.Name = "pause_button";
-            this.pause_button.Size = new System.Drawing.Size(106, 27);
+            this.pause_button.Size = new System.Drawing.Size(141, 33);
             this.pause_button.TabIndex = 3;
             this.pause_button.Text = "pause";
             this.pause_button.UseVisualStyleBackColor = true;
             // 
             // documentsNumber_txt
             // 
-            this.documentsNumber_txt.Location = new System.Drawing.Point(117, 97);
-            this.documentsNumber_txt.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.documentsNumber_txt.Location = new System.Drawing.Point(156, 119);
+            this.documentsNumber_txt.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.documentsNumber_txt.Name = "documentsNumber_txt";
-            this.documentsNumber_txt.Size = new System.Drawing.Size(99, 20);
+            this.documentsNumber_txt.Size = new System.Drawing.Size(131, 22);
             this.documentsNumber_txt.TabIndex = 5;
             // 
             // label2
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("Tahoma", 10F);
-            this.label2.Location = new System.Drawing.Point(18, 96);
-            this.label2.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label2.Location = new System.Drawing.Point(24, 118);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(101, 17);
+            this.label2.Size = new System.Drawing.Size(128, 21);
             this.label2.TabIndex = 6;
-            this.label2.Text = "craweled pages";
+            this.label2.Text = "Craweled pages";
             // 
             // crawledURLs_txt
             // 
-            this.crawledURLs_txt.Location = new System.Drawing.Point(11, 121);
-            this.crawledURLs_txt.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.crawledURLs_txt.Location = new System.Drawing.Point(15, 149);
+            this.crawledURLs_txt.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.crawledURLs_txt.Multiline = true;
             this.crawledURLs_txt.Name = "crawledURLs_txt";
-            this.crawledURLs_txt.Size = new System.Drawing.Size(213, 179);
+            this.crawledURLs_txt.Size = new System.Drawing.Size(283, 219);
             this.crawledURLs_txt.TabIndex = 9;
             // 
             // indexedPages_txt
             // 
-            this.indexedPages_txt.Location = new System.Drawing.Point(312, 120);
-            this.indexedPages_txt.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.indexedPages_txt.Location = new System.Drawing.Point(416, 148);
+            this.indexedPages_txt.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.indexedPages_txt.Multiline = true;
             this.indexedPages_txt.Name = "indexedPages_txt";
-            this.indexedPages_txt.Size = new System.Drawing.Size(213, 179);
+            this.indexedPages_txt.Size = new System.Drawing.Size(283, 219);
             this.indexedPages_txt.TabIndex = 15;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Tahoma", 10F);
-            this.label1.Location = new System.Drawing.Point(318, 95);
-            this.label1.Margin = new System.Windows.Forms.Padding(2, 0, 2, 0);
+            this.label1.Location = new System.Drawing.Point(424, 117);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(98, 17);
+            this.label1.Size = new System.Drawing.Size(118, 21);
             this.label1.TabIndex = 14;
             this.label1.Text = "Indexed pages";
             // 
             // indPgNumbers_txt
             // 
-            this.indPgNumbers_txt.Location = new System.Drawing.Point(419, 96);
-            this.indPgNumbers_txt.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.indPgNumbers_txt.Location = new System.Drawing.Point(559, 118);
+            this.indPgNumbers_txt.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.indPgNumbers_txt.Name = "indPgNumbers_txt";
-            this.indPgNumbers_txt.Size = new System.Drawing.Size(99, 20);
+            this.indPgNumbers_txt.Size = new System.Drawing.Size(131, 22);
             this.indPgNumbers_txt.TabIndex = 13;
             // 
             // pauseIndexing
             // 
-            this.pauseIndexing.Location = new System.Drawing.Point(312, 57);
-            this.pauseIndexing.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.pauseIndexing.Location = new System.Drawing.Point(416, 70);
+            this.pauseIndexing.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.pauseIndexing.Name = "pauseIndexing";
-            this.pauseIndexing.Size = new System.Drawing.Size(212, 27);
+            this.pauseIndexing.Size = new System.Drawing.Size(283, 33);
             this.pauseIndexing.TabIndex = 12;
             this.pauseIndexing.Text = "pause";
             this.pauseIndexing.UseVisualStyleBackColor = true;
@@ -141,10 +139,10 @@
             // 
             // indexingButton
             // 
-            this.indexingButton.Location = new System.Drawing.Point(312, 19);
-            this.indexingButton.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.indexingButton.Location = new System.Drawing.Point(416, 23);
+            this.indexingButton.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.indexingButton.Name = "indexingButton";
-            this.indexingButton.Size = new System.Drawing.Size(212, 27);
+            this.indexingButton.Size = new System.Drawing.Size(283, 33);
             this.indexingButton.TabIndex = 11;
             this.indexingButton.Text = "start Indexing";
             this.indexingButton.UseVisualStyleBackColor = true;
@@ -152,9 +150,9 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(533, 308);
+            this.ClientSize = new System.Drawing.Size(711, 379);
             this.Controls.Add(this.indexedPages_txt);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.indPgNumbers_txt);
@@ -166,7 +164,7 @@
             this.Controls.Add(this.pause_button);
             this.Controls.Add(this.crawel_button);
             this.Controls.Add(this.url_text);
-            this.Margin = new System.Windows.Forms.Padding(2, 3, 2, 3);
+            this.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             this.Name = "Form1";
             this.Text = "te";
             this.Load += new System.EventHandler(this.Form1_Load);

@@ -24,6 +24,8 @@ namespace WindowsFormsApp1
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number;
         String URLsFilePath;
+        Queue<KeyValuePair<int, String>> URLs;
+        string[] copyOfText;
         public Form1()
         {
             //initialize URL lists
@@ -38,24 +40,176 @@ namespace WindowsFormsApp1
         private void textBox1_TextChanged(object sender, EventArgs e){ }
         private void label1_Click(object sender, EventArgs e){ }
         private void label3_Click(object sender, EventArgs e){ }
+        private void Form1_Load(object sender, EventArgs e)
+        {
 
+        }
 
         /// <summary>
         /// Indexer Functions
         /// </summary>
         private void indexingButton_Click(object sender, EventArgs e)
         {
+            //get URLs from database
+             get_URLs();
 
+            
+            while(URLs.Count != 0)
+            {
+                KeyValuePair<int, String> URL = URLs.Dequeue();
+
+                //indexing steps
+                //1.parse the text
+                String RString = get_URL_content(URL.Value);
+                String text = extract_text(RString);
+
+                //2.tokenize it
+                List<String> listOfTokens = tokenize(text);
+
+                //3.apply linguistics algorithim
+
+                //remove punctuation character + casefolding
+
+                //stop word removal
+
+                //stemming
+
+                //4.save it in the inverted index
+
+            }
         }
 
-
+        private void get_URLs()
+        {
+            //get all URLs from database and return them in alist
+            URLs = new Queue<KeyValuePair<int, string>>();
+            string sqlQuery = "SELECT * FROM url_data";
+            SqlCommand command = new SqlCommand(sqlQuery, con);
+            try
+            { 
+                con.Open();
+                SqlDataReader reader = command.ExecuteReader();
+                while (reader.Read())
+                {
+                    KeyValuePair<int, String> URL = new KeyValuePair<int, String>((Int32)reader["Id"], ["url"].ToString());
+                    URLs.Enqueue(URL);
+                }
+                reader.Close();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
+            finally
+            {
+                con.Close();
+            }
+        }
         private String extract_text(String rString)
         {
-            String text = "";
+            String text = String.Empty;
             IHTMLDocument2 myDoc = new HTMLDocumentClass();
             myDoc.write(rString);
             text = myDoc.body.innerText;
             return text;
+        }
+        List<string> tokenize(string page_text)
+        {
+            //store words from page content after tokenize
+            List<string> list = new List<string>();
+            string word = "";
+            int i = 0;
+            foreach (char ch in page_text)
+            {
+                i++;
+                if (ch == ' ' || ch == '.' || ch == ',' || ch == ':' || ch == ';' || ch == '/' || ch == '?' || ch == '!')
+                {
+                    if (!word.Equals(""))
+                    {
+                        list.Add(word);
+                        word = "";
+                    }
+
+                }
+                else
+                {
+                    word += ch;
+                }
+                //if last char in page content
+                if (i == page_text.Length)
+                {
+                    list.Add(word);
+                    break;
+                }
+            }
+            return list;
+        }
+        private string Remove_Punctuation(string text)
+        {
+            var sb = new StringBuilder();
+            foreach (char c in text)
+            {
+                if (!char.IsPunctuation(c))
+                    sb.Append(c);
+            }
+            string str = sb.ToString();
+
+            return str.ToLower();
+        }
+        private string remove_stopWords(string text)
+        {
+            var words_to_remove = new HashSet<string> {"this","that","with","myself","a", "an","the","able", "about", "above", "abst", "accordance", "according",  "accordingly",
+  "across",  "act", "actually", "added", "adj",  "affected",
+  "affecting",  "affects",  "after", "afterwards",
+  "again",  "against",  "ah",  "all",  "almost",  "alone",
+  "along",  "already",  "also",  "although", "always",  "am",  "among",  "amongst",  "an","and",
+  "announce","another","any","anybody","anyhow","anymore",  "anyone",
+  "anything",  "anyway","anyways","anywhere","apparently","approximately","are","aren","arent", "arise",
+  "around", "as", "aside", "ask","asking",
+  "at", "auth", "available", "away", "awfully", "b","back", "be", "became", "because", "become","becomes",
+  "becoming","been", "before", "beforehand", "begin", "beginning", "beginnings", "begins",
+  "behind", "being","believe",  "below", "beside","besides",  "between",
+  "beyond", "biol", "both",  "brief",  "briefly",  "but",  "by",  "c",  "ca",
+  "came",  "can",  "cannot",  "can't",  "cause",  "causes","certain",  "certainly",  "com",
+  "come",  "comes",  "contain",  "containing",  "contains",  "could",  "couldnt",  "d",  "date",  "did", "didn't",
+  "different", "do",  "does",  "doesn't",  "doing",  "done",  "don't",  "down",  "downwards",  "due",  "during",
+  "e",  "each",  "ed",  "edu",  "effect", "eg",  "eight", "eighty",  "either",  "else",
+ "elsewhere",  "end",  "ending",  "enough",  "especially",  "et",  "et-al", "etc",  "even",
+  "ever",  "every",  "everybody",  "everyone",  "everything",  "everywhere",  "ex",  "except",  "f",  "far", "few",  "ff",  "fifth","first",
+  "five", "fix", "followed", "following","follows", "for",
+  "former",  "formerly", "forth", "found",  "four",  "from",  "further",  "furthermore",  "g",  "gave", "get",  "gets", "getting", "give",  "given", "gives",
+  "giving",  "go","goes",  "gone",  "got",  "gotten", "h",  "had",  "happens", "hardly",
+  "has", "hasn't",
+  "have", "haven't", "having", "he", "hed", "hence", "her","here","hereafter",
+  "hereby",  "herein", "heres", "hereupon", "hers","herself",
+ "hes","his", "hither", "how", "howbeit", "however","hundred",
+ "in",  "inc" ,"indeed", "index", "information",  "instead",
+  "into",  "invention", "inward","is",  "it'll",
+  "its",  "itself", "i've",
+  "j",  "just",  "k",  "keep	keeps",  "kept",  "kg",  "km",
+  };
+
+            string output = string.Join(
+                " ",
+                text
+                    .Split(new[] { ' ', '\t', '\n', '\r', '.', '!', '?', ':', '/' })
+                    .Where(word => !words_to_remove.Contains(word))
+            );
+
+            return output;
+        }
+        
+
+        private string stemming(string unstemmed)
+        {
+            copyOfText = unstemmed.Split(' ');
+            var stemmer = new EnglishPorter2Stemmer();
+            var stemmed = stemmer.Stem(unstemmed).Value;
+            return stemmed;
+        }
+        private void pauseIndexing_Click(object sender, EventArgs e)
+        {
+
         }
 
 
@@ -328,12 +482,6 @@ namespace WindowsFormsApp1
             con.Close();
             return count;
         }
-
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
-        }
-
         private bool URLs_file_exist()
         {
             // the file doesn't exist
@@ -353,109 +501,6 @@ namespace WindowsFormsApp1
 
             sr.Close();
             return true;
-        }
-        //split page content into words
-        List<string> tokenize(string page_text)
-        {
-            //store words from page content after tokenize
-            List<string> list = new List<string>();
-            string word = "";
-            int i = 0;
-            foreach (char ch in page_text)
-            {
-                i++;
-                if (ch == ' ' || ch == ',' || ch == ';' || ch == '/' || ch == '?')
-                {
-                    if (!word.Equals(""))
-                    {
-                        list.Add(word);
-                        word = "";
-                    }
-
-                }
-                else
-                {
-                    word += ch;
-                }
-                //if last char in page content
-                if (i == page_text.Length)
-                {
-                    list.Add(word);
-                    break;
-                }
-            }
-            return list;
-        }
-        
-       private string remove_stopWords(string text)
-        {
-            
-
-            var words_to_remove = new HashSet<string> {"this","that","with","myself","a", "an","the","able", "about", "above", "abst", "accordance", "according",  "accordingly",
-  "across",  "act", "actually", "added", "adj",  "affected",
-  "affecting",  "affects",  "after", "afterwards",
-  "again",  "against",  "ah",  "all",  "almost",  "alone",
-  "along",  "already",  "also",  "although", "always",  "am",  "among",  "amongst",  "an","and",
-  "announce","another","any","anybody","anyhow","anymore",  "anyone",
-  "anything",  "anyway","anyways","anywhere","apparently","approximately","are","aren","arent", "arise",
-  "around", "as", "aside", "ask","asking",
-  "at", "auth", "available", "away", "awfully", "b","back", "be", "became", "because", "become","becomes",
-  "becoming","been", "before", "beforehand", "begin", "beginning", "beginnings", "begins",
-  "behind", "being","believe",  "below", "beside","besides",  "between",
-  "beyond", "biol", "both",  "brief",  "briefly",  "but",  "by",  "c",  "ca",
-  "came",  "can",  "cannot",  "can't",  "cause",  "causes","certain",  "certainly",  "com",
-  "come",  "comes",  "contain",  "containing",  "contains",  "could",  "couldnt",  "d",  "date",  "did", "didn't",
-  "different", "do",  "does",  "doesn't",  "doing",  "done",  "don't",  "down",  "downwards",  "due",  "during",
-  "e",  "each",  "ed",  "edu",  "effect", "eg",  "eight", "eighty",  "either",  "else",
- "elsewhere",  "end",  "ending",  "enough",  "especially",  "et",  "et-al", "etc",  "even",
-  "ever",  "every",  "everybody",  "everyone",  "everything",  "everywhere",  "ex",  "except",  "f",  "far", "few",  "ff",  "fifth","first",
-  "five", "fix", "followed", "following","follows", "for",
-  "former",  "formerly", "forth", "found",  "four",  "from",  "further",  "furthermore",  "g",  "gave", "get",  "gets", "getting", "give",  "given", "gives",
-  "giving",  "go","goes",  "gone",  "got",  "gotten", "h",  "had",  "happens", "hardly",
-  "has", "hasn't",
-  "have", "haven't", "having", "he", "hed", "hence", "her","here","hereafter",
-  "hereby",  "herein", "heres", "hereupon", "hers","herself",
- "hes","his", "hither", "how", "howbeit", "however","hundred",
- "in",  "inc" ,"indeed", "index", "information",  "instead",
-  "into",  "invention", "inward","is",  "it'll",
-  "its",  "itself", "i've",
-  "j",  "just",  "k",  "keep	keeps",  "kept",  "kg",  "km",
-  };
-
-            string output = string.Join(
-                " ",
-                text
-                    .Split(new[] { ' ', '\t', '\n', '\r' ,'.','!','?',':','/' })
-                    .Where(word => !words_to_remove.Contains(word))
-            );
-
-            return output;
-        }
-        string []copyOfText;
-        private string stemming (string unstemmed)
-        {
-            copyOfText= unstemmed.Split(' ');
-            var stemmer = new EnglishPorter2Stemmer();
-            var stemmed = stemmer.Stem(unstemmed).Value;
-            return stemmed;
-        }
-
-        private void pauseIndexing_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private string Remove_Punctuation(string text)
-        {
-            var sb = new StringBuilder();
-            foreach (char c in text)
-            {
-                if (!char.IsPunctuation(c))
-                    sb.Append(c);
-            }
-            string str = sb.ToString();
-
-            return str.ToLower();
         }
     }
 }
