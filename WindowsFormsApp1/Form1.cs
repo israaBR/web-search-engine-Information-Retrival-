@@ -23,9 +23,10 @@ namespace WindowsFormsApp1
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number;
+        private List<invertedIndex> ListOfInvertedIndex;
         String URLsFilePath;
         Queue<KeyValuePair<int, String>> URLs;
-        string[] copyOfText;
+        Dictionary<string, string> copyOfText = new Dictionary<string, string>();
         public Form1()
         {
             //initialize URL lists
@@ -53,7 +54,6 @@ namespace WindowsFormsApp1
             //get URLs from database
              get_URLs();
 
-            
             while(URLs.Count != 0)
             {
                 KeyValuePair<int, String> URL = URLs.Dequeue();
@@ -67,16 +67,21 @@ namespace WindowsFormsApp1
                 List<String> listOfTokens = tokenize(text);
 
                 //3.apply linguistics algorithim
-
                 //remove punctuation character + casefolding
-
+                List<String> listOfTerms = Remove_Punctuation(listOfTokens);
                 //stop word removal
-
+                listOfTerms = remove_stopWords(listOfTerms);
                 //stemming
+                copy_list_of_terms(listOfTerms, URL.Key);
+                listOfTerms = stemming(listOfTerms);
 
                 //4.save it in the inverted index
-
+                StoreInvertedIndex(listOfTerms, URL.Key);
             }
+
+            //store in database
+            store_terms_in_database();
+            store_invertedIndex_DB();
         }
 
         private void get_URLs()
@@ -91,7 +96,7 @@ namespace WindowsFormsApp1
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    KeyValuePair<int, String> URL = new KeyValuePair<int, String>((Int32)reader["Id"], ["url"].ToString());
+                    KeyValuePair<int, String> URL = new KeyValuePair<int, String>((Int32)reader["Id"], reader["url"].ToString());
                     URLs.Enqueue(URL);
                 }
                 reader.Close();
@@ -104,6 +109,34 @@ namespace WindowsFormsApp1
             {
                 con.Close();
             }
+        }
+        private void store_terms_in_database()
+        {
+            con.Open();
+            SqlCommand cmd = con.CreateCommand();
+            foreach(KeyValuePair<String, String> term in copyOfText)
+            {
+                cmd.CommandText = "insert into term_data values ('" + term.Key + "','" + term.Value + "');";
+            }
+            cmd.ExecuteNonQuery();
+            con.Close();
+        }
+        private void store_invertedIndex_DB()
+        { 
+            con.Open();
+            SqlCommand cmd = con.CreateCommand();
+            foreach (invertedIndex index in ListOfInvertedIndex)
+            {
+                string term_index = index.freq.ToString() + ";";
+                foreach (int doc in index.doc_pos.Keys)
+                {
+                    term_index += doc + ":" + index.doc_pos[doc] + ";";
+                }
+
+                cmd.CommandText = "insert into dictionary values ('" + index.Term + "','" + term_index + "');";
+            }
+            cmd.ExecuteNonQuery();
+            con.Close();
         }
         private String extract_text(String rString)
         {
@@ -144,19 +177,24 @@ namespace WindowsFormsApp1
             }
             return list;
         }
-        private string Remove_Punctuation(string text)
+        private List<string> Remove_Punctuation(List<string> text)
         {
-            var sb = new StringBuilder();
-            foreach (char c in text)
+            List<string> newText = new List<string>();
+            foreach (string word in text)
             {
-                if (!char.IsPunctuation(c))
-                    sb.Append(c);
+                var sb = new StringBuilder();
+                foreach (char c in word)
+                {
+                    if (!char.IsPunctuation(c))
+                        sb.Append(c);
+                }
+                string str = sb.ToString();
+                newText.Add(str.ToLower());
             }
-            string str = sb.ToString();
 
-            return str.ToLower();
+            return newText;
         }
-        private string remove_stopWords(string text)
+        private List<string> remove_stopWords(List<string> text)
         {
             var words_to_remove = new HashSet<string> {"this","that","with","myself","a", "an","the","able", "about", "above", "abst", "accordance", "according",  "accordingly",
   "across",  "act", "actually", "added", "adj",  "affected",
@@ -189,24 +227,107 @@ namespace WindowsFormsApp1
   "j",  "just",  "k",  "keep	keeps",  "kept",  "kg",  "km",
   };
 
+            foreach (String word in text)
+            {
+                if (words_to_remove.Contains(word))
+                {
+                    int index = text.FindIndex(s => s == word);
+
+                    if (index != -1)
+                        text[index] = String.Empty;
+                }
+
+             }
+            
+            /*
             string output = string.Join(
                 " ",
                 text
                     .Split(new[] { ' ', '\t', '\n', '\r', '.', '!', '?', ':', '/' })
                     .Where(word => !words_to_remove.Contains(word))
             );
-
-            return output;
+            */
+            return text;
         }
-        
-
-        private string stemming(string unstemmed)
+        private void copy_list_of_terms(List<string> listOfTerms, int docID)
         {
-            copyOfText = unstemmed.Split(' ');
+            foreach(string term in listOfTerms)
+            {
+                if (copyOfText.ContainsKey(term))
+                    copyOfText[term] = copyOfText[term] + "," + docID.ToString();
+                else
+                    copyOfText.Add(term, docID.ToString());
+            }
+        }
+        private List<string> stemming(List<string> unstemmed)
+        {
+            List<string> stemmed = new List<string>();
             var stemmer = new EnglishPorter2Stemmer();
-            var stemmed = stemmer.Stem(unstemmed).Value;
+            foreach(string unstemmedWord in unstemmed)
+            {
+                var stemmedWord = stemmer.Stem(unstemmedWord).Value;
+                stemmed.Add(stemmedWord);
+            }
             return stemmed;
         }
+        private void StoreInvertedIndex(List<string> ItemList, int documentID)
+        {
+            //int position = 1;
+            for (int i = 0; i < ItemList.Count; i++)
+            {
+                if (ItemList[i].Equals(String.Empty))
+                    continue;
+                else
+                {
+
+                    //bool exist = false;
+                    foreach (var list in ListOfInvertedIndex)
+                    {
+                        if (list.Term.Equals(ItemList[i]) && list.doc_pos.ContainsKey(documentID))//term exists and docID is the same
+                        {
+                            list.freq++;
+                            //list.position.Add(inv.position.ElementAt(0));
+                            list.doc_pos[documentID] = list.doc_pos[documentID] + "," + i.ToString();
+                            //exist = true;
+                            break;
+                        }
+                        else if (list.Term.Equals(ItemList[i]))//term exists and different docID
+                        {
+                            list.freq++;
+                            list.doc_pos.Add(documentID, i.ToString());
+                            break;
+                        }
+                        else//term do not exist
+                        {
+                            invertedIndex inv = new invertedIndex();
+                            inv.freq = 1;
+                            inv.Term = ItemList[i];
+                            list.doc_pos.Add(documentID, i.ToString());
+                            break;
+                            //inv.docId = documentID;
+                            //inv.position.Add(i);
+                        }
+                    }
+                }
+            }
+        }
+        public class invertedIndex : IComparable<invertedIndex>
+    {
+        public string Term;
+        //public int docId;
+        public int freq;
+        //public List<int> position = new List<int>();
+        public Dictionary<int, String> doc_pos = new Dictionary<int, string>();
+        public int CompareTo(invertedIndex obj)
+        {
+            if (this.Term[0] > obj.Term[0])
+                return 1;
+            else if (this.Term[0] < obj.Term[0])
+                return -1;
+            else
+                return 0;
+        }
+    }
         private void pauseIndexing_Click(object sender, EventArgs e)
         {
 
@@ -226,8 +347,8 @@ namespace WindowsFormsApp1
                 // add to list of URLs to be visited
                 toBeVisitedURLs.Enqueue(url_text.Text);
                 // parse URL's Robot.txt file
-                _BlockedUrls.Clear();
-                parse_robots_file(url_text.Text);
+                //_BlockedUrls.Clear();
+                //parse_robots_file(url_text.Text);
             }
 
             // 2.fetch the document at the URL
@@ -239,15 +360,15 @@ namespace WindowsFormsApp1
 
 
                 String Rstring = get_URL_content(url_text.Text);
-                bool lang = false;
-                foreach (var a in Rstring.Split(' '))
-                {
-                    if (a.Equals("lang=\"en\""))
-                    {
-                        lang = true;
-                        break;
-                    }
-                }
+                //bool lang = false;
+                //foreach (var a in Rstring.Split(' '))
+               // {
+                 //   if (a.Equals("lang=\"en\""))
+                   // {
+                     //   lang = true;
+                       // break;
+                    //}
+                //}
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
                 List<String> Links = extract_links(Rstring);
@@ -256,18 +377,18 @@ namespace WindowsFormsApp1
                 //check if extracted URLs are allowed
                 for (int i = 0; i < Links.Count; i++)
                 {
-                    if (URL_is_allowed(Links.First()))
-                    {
+                  //  if (URL_is_allowed(Links.First()))
+                    //{
                         //normalize the URL
                         String newURL = URL_normalization(Links.First());
                         //check if exists in URLs to be visited or in database
                         if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
                             toBeVisitedURLs.Enqueue(newURL);
-                    }
+                    //}
                     Links.Remove(Links.First());////////
                 }
-                if (lang == true)
-                {
+                //if (lang == true)
+                //{
                     //extract text
                     //String text = extract_text(Rstring);
 
@@ -279,7 +400,7 @@ namespace WindowsFormsApp1
                     crawled_documents_number++;
                     documentsNumber_txt.Clear();
                     documentsNumber_txt.AppendText(crawled_documents_number.ToString());
-                }
+                //}
                 Console.WriteLine(URL);
             }
         }
@@ -424,7 +545,7 @@ namespace WindowsFormsApp1
             // 4.remove fragment part'#' if exists
             int fragmentPosition = finalURL.IndexOf('#');
             if(fragmentPosition > 0) //fragment exists
-                finalURL = finalURL = finalURL.Substring(0, fragmentPosition);
+                finalURL = finalURL.Substring(0, fragmentPosition);
 
             // 5.remove default port(80 for http/ 443 for https)
             if (finalURL.Contains(":80"))
@@ -502,5 +623,6 @@ namespace WindowsFormsApp1
             sr.Close();
             return true;
         }
+
     }
 }
