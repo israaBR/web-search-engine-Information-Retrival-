@@ -22,8 +22,8 @@ namespace WindowsFormsApp1
         private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
-        int crawled_documents_number;
-        private List<invertedIndex> ListOfInvertedIndex;
+        int crawled_documents_number, indexed_documents_number;
+        private List<invertedIndex> ListOfInvertedIndex = new List<invertedIndex>();
         String URLsFilePath;
         Queue<KeyValuePair<int, String>> URLs;
         Dictionary<string, string> copyOfText = new Dictionary<string, string>();
@@ -34,6 +34,7 @@ namespace WindowsFormsApp1
             currentlyVisitingURLs = new List<String>();
             _BlockedUrls = new List<String>();
             crawled_documents_number = get_documents_number();
+            indexed_documents_number = 0;
             URLsFilePath = @"c:\URLs";
 
             InitializeComponent();
@@ -61,34 +62,52 @@ namespace WindowsFormsApp1
                 //indexing steps
                 //1.parse the text
                 String RString = get_URL_content(URL.Value);
-                String text = extract_text(RString);
+                if (RString.Equals(String.Empty))
+                    continue;
+                else
+                {
+                    String text = extract_text(RString);
 
-                //2.tokenize it
-                List<String> listOfTokens = tokenize(text);
+                    //2.tokenize it
+                    List<String> listOfTokens = tokenize(text);
 
-                //3.apply linguistics algorithim
-                //remove punctuation character + casefolding
-                List<String> listOfTerms = Remove_Punctuation(listOfTokens);
-                //stop word removal
-                listOfTerms = remove_stopWords(listOfTerms);
-                //stemming
-                copy_list_of_terms(listOfTerms, URL.Key);
-                listOfTerms = stemming(listOfTerms);
+                    //3.apply linguistics algorithim
+                    //remove punctuation character + casefolding
+                    List<String> listOfTerms = Remove_Punctuation(listOfTokens);
+                    //stop word removal
+                    listOfTerms = remove_stopWords(listOfTerms);
+                    //stemming
+                    copy_list_of_terms(listOfTerms, URL.Key);
+                    listOfTerms = stemming(listOfTerms);
 
-                //4.save it in the inverted index
-                StoreInvertedIndex(listOfTerms, URL.Key);
+                    //4.save it in the inverted index
+                    StoreInvertedIndex(listOfTerms, URL.Key);
+
+                    //remove from currently visiting URLs and display URL in crawled URLs
+                    indexedPages_txt.AppendText(URL + "\r\n");
+                    indexed_documents_number++;
+                    indPgNumbers_txt.Clear();
+                    indPgNumbers_txt.AppendText(indexed_documents_number.ToString());
+                    //}
+                    Console.WriteLine(URL);
+                }
+                
             }
 
             //store in database
             store_terms_in_database();
             store_invertedIndex_DB();
+            indexedPages_txt.AppendText("-----Indexing Done-----");
+            Console.WriteLine("-----Indexing Done-----");
         }
 
         private void get_URLs()
         {
             //get all URLs from database and return them in alist
             URLs = new Queue<KeyValuePair<int, string>>();
-            string sqlQuery = "SELECT * FROM url_data";
+            //            string sqlQuery = "SELECT * FROM url_data";
+            string sqlQuery = "SELECT * FROM URLData";
+
             SqlCommand command = new SqlCommand(sqlQuery, con);
             try
             { 
@@ -96,7 +115,7 @@ namespace WindowsFormsApp1
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
                 {
-                    KeyValuePair<int, String> URL = new KeyValuePair<int, String>((Int32)reader["Id"], reader["url"].ToString());
+                    KeyValuePair<int, String> URL = new KeyValuePair<int, String>((Int32)reader["Id"], reader["_url"].ToString());
                     URLs.Enqueue(URL);
                 }
                 reader.Close();
@@ -117,8 +136,9 @@ namespace WindowsFormsApp1
             foreach(KeyValuePair<String, String> term in copyOfText)
             {
                 cmd.CommandText = "insert into term_data values ('" + term.Key + "','" + term.Value + "');";
+                cmd.ExecuteNonQuery();
+
             }
-            cmd.ExecuteNonQuery();
             con.Close();
         }
         private void store_invertedIndex_DB()
@@ -134,8 +154,8 @@ namespace WindowsFormsApp1
                 }
 
                 cmd.CommandText = "insert into dictionary values ('" + index.Term + "','" + term_index + "');";
+                cmd.ExecuteNonQuery();
             }
-            cmd.ExecuteNonQuery();
             con.Close();
         }
         private String extract_text(String rString)
@@ -155,7 +175,7 @@ namespace WindowsFormsApp1
             foreach (char ch in page_text)
             {
                 i++;
-                if (ch == ' ' || ch == '.' || ch == ',' || ch == ':' || ch == ';' || ch == '/' || ch == '?' || ch == '!')
+                if (ch == ' ' || ch =='\t' || ch=='\n' || ch=='\r' || ch == '.' || ch == ',' || ch == ':' || ch == ';' || ch == '/' || ch == '?' || ch == '!')
                 {
                     if (!word.Equals(""))
                     {
@@ -217,7 +237,7 @@ namespace WindowsFormsApp1
   "five", "fix", "followed", "following","follows", "for",
   "former",  "formerly", "forth", "found",  "four",  "from",  "further",  "furthermore",  "g",  "gave", "get",  "gets", "getting", "give",  "given", "gives",
   "giving",  "go","goes",  "gone",  "got",  "gotten", "h",  "had",  "happens", "hardly",
-  "has", "hasn't",
+  "has", "hasn't","or",
   "have", "haven't", "having", "he", "hed", "hence", "her","here","hereafter",
   "hereby",  "herein", "heres", "hereupon", "hers","herself",
  "hes","his", "hither", "how", "howbeit", "however","hundred",
@@ -227,7 +247,7 @@ namespace WindowsFormsApp1
   "j",  "just",  "k",  "keep	keeps",  "kept",  "kg",  "km",
   };
 
-            foreach (String word in text)
+            foreach (string word in text.ToList())
             {
                 if (words_to_remove.Contains(word))
                 {
@@ -254,7 +274,11 @@ namespace WindowsFormsApp1
             foreach(string term in listOfTerms)
             {
                 if (copyOfText.ContainsKey(term))
-                    copyOfText[term] = copyOfText[term] + "," + docID.ToString();
+                {
+                    string[] doc = copyOfText[term].Split(',');
+                    if(!doc.Contains(docID.ToString()))
+                        copyOfText[term] = copyOfText[term] + "," + docID.ToString();
+                }
                 else
                     copyOfText.Add(term, docID.ToString());
             }
@@ -280,7 +304,7 @@ namespace WindowsFormsApp1
                 else
                 {
 
-                    //bool exist = false;
+                    bool exist = false;
                     foreach (var list in ListOfInvertedIndex)
                     {
                         if (list.Term.Equals(ItemList[i]) && list.doc_pos.ContainsKey(documentID))//term exists and docID is the same
@@ -288,25 +312,28 @@ namespace WindowsFormsApp1
                             list.freq++;
                             //list.position.Add(inv.position.ElementAt(0));
                             list.doc_pos[documentID] = list.doc_pos[documentID] + "," + i.ToString();
-                            //exist = true;
+                            exist = true;
                             break;
                         }
                         else if (list.Term.Equals(ItemList[i]))//term exists and different docID
                         {
                             list.freq++;
                             list.doc_pos.Add(documentID, i.ToString());
+                            exist = true;
                             break;
                         }
-                        else//term do not exist
-                        {
-                            invertedIndex inv = new invertedIndex();
-                            inv.freq = 1;
-                            inv.Term = ItemList[i];
-                            list.doc_pos.Add(documentID, i.ToString());
-                            break;
-                            //inv.docId = documentID;
-                            //inv.position.Add(i);
-                        }
+                        
+                    }
+                    if (!exist)//term do not exist
+                    {
+                        invertedIndex inv = new invertedIndex();
+                        inv.freq = 1;
+                        inv.Term = ItemList[i];
+                        inv.doc_pos.Add(documentID, i.ToString());
+                        ListOfInvertedIndex.Add(inv);
+                        //inv.docId = documentID;
+                        //inv.position.Add(i);
+
                     }
                 }
             }
@@ -381,19 +408,21 @@ namespace WindowsFormsApp1
                     //{
                         //normalize the URL
                         String newURL = URL_normalization(Links.First());
-                        //check if exists in URLs to be visited or in database
-                        if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
+                    if (newURL.Equals(String.Empty))
+                    {
+                        Links.Remove(Links.First());
+                        continue;
+                    }
+                    //check if exists in URLs to be visited or in database
+                    if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
                             toBeVisitedURLs.Enqueue(newURL);
                     //}
-                    Links.Remove(Links.First());////////
+                    Links.Remove(Links.First());
                 }
                 //if (lang == true)
                 //{
-                    //extract text
-                    //String text = extract_text(Rstring);
-
                     //store it in database
-                    store_URL_in_database(URL_normalization(URL), "");
+                    store_URL_in_database(URL);
                     //remove from currently visiting URLs and display URL in crawled URLs
                     currentlyVisitingURLs.Remove(URL);
                     crawledURLs_txt.AppendText(URL + "\r\n");
@@ -427,10 +456,11 @@ namespace WindowsFormsApp1
             WebRequest myWebRequest;
             WebResponse myWebResponse;
 
-            
-            myWebRequest = WebRequest.Create(URL);
-
+            try
+            {
+                myWebRequest = WebRequest.Create(URL);
                 myWebResponse = myWebRequest.GetResponse();//Returns a response from an Internet resource
+
                 Stream streamResponse = myWebResponse.GetResponseStream();//return the data stream from the internet and save it in the stream
                 StreamReader sreader = new StreamReader(streamResponse);//reads the data stream
                 Rstring = sreader.ReadToEnd();//reads it to the end
@@ -438,8 +468,12 @@ namespace WindowsFormsApp1
                 streamResponse.Close();
                 sreader.Close();
                 myWebResponse.Close();
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("!!!SKIP!!! => " + e.Message);
 
-
+            }
             return Rstring;
         }
         private List<String> extract_links(String rString)
@@ -531,6 +565,13 @@ namespace WindowsFormsApp1
         }
         private String URL_normalization(String URL)
         {
+            if(URL.Substring(0,5).Equals("about"))
+            {
+                if (URL.Contains("blank"))
+                    return String.Empty;
+                else
+                    URL = URL.Replace(URL.Substring(0, 7), currentlyVisitingURLs[0]);
+            }
             // 1.put URL in lower case
             String finalURL = URL.ToLower();
 
@@ -553,16 +594,16 @@ namespace WindowsFormsApp1
             else if (finalURL.Contains(":443"))
                 finalURL = finalURL.Replace(":443", "");
 
-            //// 6.remove 's' from 'https'
-            //if (finalURL.Contains("https"))
-            //    finalURL = finalURL.Replace("https", "http");
-
+            // 6.remove 's' from 'https'
+            if (finalURL.Contains("https"))
+                finalURL = finalURL.Replace("https", "http");
+            /*
             // 6.remove 'http/s' from the URL
             if (finalURL.Contains("https:"))
                 finalURL = finalURL.Replace("https:", "");
             else if (finalURL.Contains("http:"))
                 finalURL = finalURL.Replace("http:", "");
-
+            */
             return finalURL;
         }
         private bool URL_is_exist(String URL)
@@ -571,7 +612,9 @@ namespace WindowsFormsApp1
             con.Open();
             int count = 0;
             SqlCommand cmd = con.CreateCommand();
-            cmd.CommandText = "select * from url_data where url = '" + URL + "'";
+            //            cmd.CommandText = "select * from url_data where url = '" + URL + "'";
+            cmd.CommandText = "select * from URLData where _url = '" + URL + "'";
+
             if (cmd.ExecuteScalar() != null)
                 count = (Int32)cmd.ExecuteScalar();
             con.Close(); 
@@ -580,12 +623,13 @@ namespace WindowsFormsApp1
                 return true;
             return false;
         }
-        private void store_URL_in_database(String URL, String text)
+        private void store_URL_in_database(String URL)
         {
             con.Open();
             SqlCommand cmd = con.CreateCommand();
-            //cmd.CommandText = "insert into url_data values ('" + URL + "', '"+ text+ "');";
-            cmd.CommandText = "insert into url_data (url) values ('" + URL + "');";
+            //            cmd.CommandText = "insert into url_data (url) values ('" + URL + "');";
+            cmd.CommandText = "insert into URLData (_url) values ('" + URL + "');";
+
             cmd.ExecuteNonQuery();
             con.Close();
         }
@@ -595,7 +639,9 @@ namespace WindowsFormsApp1
             con.Open();
             SqlCommand cmd = con.CreateCommand();
             Int32 count;
-            cmd.CommandText = "select * from url_data";
+            //           cmd.CommandText = "select * from url_data";
+            cmd.CommandText = "select * from URLData";
+
             if (cmd.ExecuteScalar() != null)
                 count = (Int32)cmd.ExecuteScalar();
             else
