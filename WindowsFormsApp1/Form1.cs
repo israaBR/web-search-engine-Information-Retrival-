@@ -19,7 +19,7 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         //modify connection string if database is not working
-        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
+        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\FCIS\IR\engine\WindowsFormsApp1\bin\Debug\database.mdf;Integrated Security=True;Connect Timeout=30");
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number, indexed_documents_number;
@@ -433,6 +433,7 @@ namespace WindowsFormsApp1
                 Console.WriteLine(URL);
             }
         }
+
         private void pause_button_Click(object sender, EventArgs e)
         {
             StreamWriter sw = new StreamWriter(URLsFilePath);
@@ -450,6 +451,7 @@ namespace WindowsFormsApp1
             sw.Close();
             Application.Exit();
         }
+
         private String get_URL_content(String URL)
         {
             String Rstring = String.Empty;
@@ -476,6 +478,7 @@ namespace WindowsFormsApp1
             }
             return Rstring;
         }
+
         private List<String> extract_links(String rString)
         {
             List<String> links = new List<String>();
@@ -488,6 +491,7 @@ namespace WindowsFormsApp1
             }
             return links;
         }
+
         private void parse_robots_file(String URL)
         {  
             //string RobotsTxtFile = "http://" + URL + "/robots.txt";
@@ -532,6 +536,7 @@ namespace WindowsFormsApp1
                 }
             }
         }
+
         private bool URL_is_allowed(String URL)
         {
             // If no URLS stored in blocked URLs list then all URLs are allowed
@@ -563,6 +568,7 @@ namespace WindowsFormsApp1
             //the URL is not disallowed
             return true;
         }
+
         private String URL_normalization(String URL)
         {
             if(URL.Substring(0,5).Equals("about"))
@@ -606,6 +612,7 @@ namespace WindowsFormsApp1
             */
             return finalURL;
         }
+
         private bool URL_is_exist(String URL)
         {
             //check if URL has been crawled already and stored in database
@@ -623,6 +630,7 @@ namespace WindowsFormsApp1
                 return true;
             return false;
         }
+
         private void store_URL_in_database(String URL)
         {
             con.Open();
@@ -633,6 +641,7 @@ namespace WindowsFormsApp1
             cmd.ExecuteNonQuery();
             con.Close();
         }
+
         private int get_documents_number()
         {
             //get number of records in url_data table in database
@@ -649,6 +658,7 @@ namespace WindowsFormsApp1
             con.Close();
             return count;
         }
+
         private bool URLs_file_exist()
         {
             // the file doesn't exist

@@ -8,7 +8,7 @@
     <OutputType>WinExe</OutputType>
     <RootNamespace>WindowsFormsApp1</RootNamespace>
     <AssemblyName>WindowsFormsApp1</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <Deterministic>true</Deterministic>
@@ -74,6 +74,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Form2.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form2.Designer.cs">
+      <DependentUpon>Form2.cs</DependentUpon>
+    </Compile>
     <Compile Include="stem\EnglishPorter2Stemmer.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -89,6 +95,9 @@
     <Compile Include="stem\StemmedWord.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form2.resx">
+      <DependentUpon>Form2.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -129,6 +138,13 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\Debug\se.png" />
+    <None Include="bin\Debug\Qwant-Search-Logo.png" />
+    <None Include="bin\Debug\download-blue-search-icon-button-png-11640084027s0fkuhz2lb.png" />
+    <None Include="bin\Debug\free-icons-png-instagram-search-icon-white-11562954322qzcobg6iwo.png" />
+    <None Include="bin\Debug\kisspng-persian-search-engine-on-the-way-financial-tribu-5b6669542eb7f6.2667806015334382921914.jpg" />
+    <None Include="bin\Debug\kisspng-persian-search-engine-on-the-way-financial-tribu-5b6669542eb7f6.2667806015334382921914.png" />
+    <None Include="bin\Debug\images.png" />
     <Content Include="searchEngineDatabase.mdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

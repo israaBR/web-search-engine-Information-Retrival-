@@ -152,7 +152,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(711, 379);
+            this.ClientSize = new System.Drawing.Size(1157, 474);
             this.Controls.Add(this.indexedPages_txt);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.indPgNumbers_txt);

@@ -19,7 +19,7 @@ namespace WindowsFormsApp1.Properties {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "16.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
     internal class Resources {
@@ -57,6 +57,77 @@ namespace WindowsFormsApp1.Properties {
             }
             set {
                 resourceCulture = value;
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap download_blue_search_icon_button_png_11640084027s0fkuhz2lb {
+            get {
+                object obj = ResourceManager.GetObject("download-blue-search-icon-button-png-11640084027s0fkuhz2lb", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap free_icons_png_instagram_search_icon_white_11562954322qzcobg6iwo {
+            get {
+                object obj = ResourceManager.GetObject("free-icons-png-instagram-search-icon-white-11562954322qzcobg6iwo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap images {
+            get {
+                object obj = ResourceManager.GetObject("images", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap kisspng_persian_search_engine_on_the_way_financial_tribu_5b6669542eb7f6_2667806015334382921914 {
+            get {
+                object obj = ResourceManager.GetObject("kisspng-persian-search-engine-on-the-way-financial-tribu-5b6669542eb7f6.266780601" +
+                        "5334382921914", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap kisspng_persian_search_engine_on_the_way_financial_tribu_5b6669542eb7f61 {
+            get {
+                object obj = ResourceManager.GetObject("kisspng-persian-search-engine-on-the-way-financial-tribu-5b6669542eb7f61", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Qwant_Search_Logo {
+            get {
+                object obj = ResourceManager.GetObject("Qwant-Search-Logo", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap se {
+            get {
+                object obj = ResourceManager.GetObject("se", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
             }
         }
     }
