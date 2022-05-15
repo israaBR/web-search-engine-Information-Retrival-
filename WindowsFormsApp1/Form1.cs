@@ -19,7 +19,7 @@ namespace WindowsFormsApp1
     public partial class Form1 : Form
     {
         //modify connection string if database is not working
-        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=D:\FCIS\IR\engine\WindowsFormsApp1\bin\Debug\database.mdf;Integrated Security=True;Connect Timeout=30");
+        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
         private Queue<String> toBeVisitedURLs;
         private List<String> currentlyVisitingURLs, _BlockedUrls;
         int crawled_documents_number, indexed_documents_number;
@@ -39,9 +39,9 @@ namespace WindowsFormsApp1
 
             InitializeComponent();
         }
-        private void textBox1_TextChanged(object sender, EventArgs e){ }
-        private void label1_Click(object sender, EventArgs e){ }
-        private void label3_Click(object sender, EventArgs e){ }
+        private void textBox1_TextChanged(object sender, EventArgs e) { }
+        private void label1_Click(object sender, EventArgs e) { }
+        private void label3_Click(object sender, EventArgs e) { }
         private void Form1_Load(object sender, EventArgs e)
         {
 
@@ -53,9 +53,9 @@ namespace WindowsFormsApp1
         private void indexingButton_Click(object sender, EventArgs e)
         {
             //get URLs from database
-             get_URLs();
+            get_URLs();
 
-            while(URLs.Count != 0)
+            while (URLs.Count != 0)
             {
                 KeyValuePair<int, String> URL = URLs.Dequeue();
 
@@ -91,7 +91,7 @@ namespace WindowsFormsApp1
                     //}
                     Console.WriteLine(URL);
                 }
-                
+
             }
 
             //store in database
@@ -110,7 +110,7 @@ namespace WindowsFormsApp1
 
             SqlCommand command = new SqlCommand(sqlQuery, con);
             try
-            { 
+            {
                 con.Open();
                 SqlDataReader reader = command.ExecuteReader();
                 while (reader.Read())
@@ -129,11 +129,12 @@ namespace WindowsFormsApp1
                 con.Close();
             }
         }
+
         private void store_terms_in_database()
         {
             con.Open();
             SqlCommand cmd = con.CreateCommand();
-            foreach(KeyValuePair<String, String> term in copyOfText)
+            foreach (KeyValuePair<String, String> term in copyOfText)
             {
                 cmd.CommandText = "insert into term_data values ('" + term.Key + "','" + term.Value + "');";
                 cmd.ExecuteNonQuery();
@@ -141,8 +142,9 @@ namespace WindowsFormsApp1
             }
             con.Close();
         }
+
         private void store_invertedIndex_DB()
-        { 
+        {
             con.Open();
             SqlCommand cmd = con.CreateCommand();
             foreach (invertedIndex index in ListOfInvertedIndex)
@@ -158,6 +160,7 @@ namespace WindowsFormsApp1
             }
             con.Close();
         }
+
         private String extract_text(String rString)
         {
             String text = String.Empty;
@@ -166,6 +169,7 @@ namespace WindowsFormsApp1
             text = myDoc.body.innerText;
             return text;
         }
+
         List<string> tokenize(string page_text)
         {
             //store words from page content after tokenize
@@ -175,7 +179,7 @@ namespace WindowsFormsApp1
             foreach (char ch in page_text)
             {
                 i++;
-                if (ch == ' ' || ch =='\t' || ch=='\n' || ch=='\r' || ch == '.' || ch == ',' || ch == ':' || ch == ';' || ch == '/' || ch == '?' || ch == '!')
+                if (ch == ' ' || ch == '\t' || ch == '\n' || ch == '\r' || ch == '.' || ch == ',' || ch == ':' || ch == ';' || ch == '/' || ch == '?' || ch == '!')
                 {
                     if (!word.Equals(""))
                     {
@@ -197,6 +201,7 @@ namespace WindowsFormsApp1
             }
             return list;
         }
+
         private List<string> Remove_Punctuation(List<string> text)
         {
             List<string> newText = new List<string>();
@@ -214,6 +219,7 @@ namespace WindowsFormsApp1
 
             return newText;
         }
+
         private List<string> remove_stopWords(List<string> text)
         {
             var words_to_remove = new HashSet<string> {"this","that","with","myself","a", "an","the","able", "about", "above", "abst", "accordance", "according",  "accordingly",
@@ -257,8 +263,8 @@ namespace WindowsFormsApp1
                         text[index] = String.Empty;
                 }
 
-             }
-            
+            }
+
             /*
             string output = string.Join(
                 " ",
@@ -269,31 +275,34 @@ namespace WindowsFormsApp1
             */
             return text;
         }
+
         private void copy_list_of_terms(List<string> listOfTerms, int docID)
         {
-            foreach(string term in listOfTerms)
+            foreach (string term in listOfTerms)
             {
                 if (copyOfText.ContainsKey(term))
                 {
                     string[] doc = copyOfText[term].Split(',');
-                    if(!doc.Contains(docID.ToString()))
+                    if (!doc.Contains(docID.ToString()))
                         copyOfText[term] = copyOfText[term] + "," + docID.ToString();
                 }
                 else
                     copyOfText.Add(term, docID.ToString());
             }
         }
+
         private List<string> stemming(List<string> unstemmed)
         {
             List<string> stemmed = new List<string>();
             var stemmer = new EnglishPorter2Stemmer();
-            foreach(string unstemmedWord in unstemmed)
+            foreach (string unstemmedWord in unstemmed)
             {
                 var stemmedWord = stemmer.Stem(unstemmedWord).Value;
                 stemmed.Add(stemmedWord);
             }
             return stemmed;
         }
+
         private void StoreInvertedIndex(List<string> ItemList, int documentID)
         {
             //int position = 1;
@@ -322,7 +331,7 @@ namespace WindowsFormsApp1
                             exist = true;
                             break;
                         }
-                        
+
                     }
                     if (!exist)//term do not exist
                     {
@@ -338,23 +347,25 @@ namespace WindowsFormsApp1
                 }
             }
         }
+
         public class invertedIndex : IComparable<invertedIndex>
-    {
-        public string Term;
-        //public int docId;
-        public int freq;
-        //public List<int> position = new List<int>();
-        public Dictionary<int, String> doc_pos = new Dictionary<int, string>();
-        public int CompareTo(invertedIndex obj)
         {
-            if (this.Term[0] > obj.Term[0])
-                return 1;
-            else if (this.Term[0] < obj.Term[0])
-                return -1;
-            else
-                return 0;
+            public string Term;
+            //public int docId;
+            public int freq;
+            //public List<int> position = new List<int>();
+            public Dictionary<int, String> doc_pos = new Dictionary<int, string>();
+            public int CompareTo(invertedIndex obj)
+            {
+                if (this.Term[0] > obj.Term[0])
+                    return 1;
+                else if (this.Term[0] < obj.Term[0])
+                    return -1;
+                else
+                    return 0;
+            }
         }
-    }
+
         private void pauseIndexing_Click(object sender, EventArgs e)
         {
 
@@ -389,12 +400,12 @@ namespace WindowsFormsApp1
                 String Rstring = get_URL_content(url_text.Text);
                 //bool lang = false;
                 //foreach (var a in Rstring.Split(' '))
-               // {
-                 //   if (a.Equals("lang=\"en\""))
-                   // {
-                     //   lang = true;
-                       // break;
-                    //}
+                // {
+                //   if (a.Equals("lang=\"en\""))
+                // {
+                //   lang = true;
+                // break;
+                //}
                 //}
                 // 3.Parse the URL – HTML parser
                 // Extract links from it to other docs(URLs)
@@ -404,10 +415,10 @@ namespace WindowsFormsApp1
                 //check if extracted URLs are allowed
                 for (int i = 0; i < Links.Count; i++)
                 {
-                  //  if (URL_is_allowed(Links.First()))
+                    //  if (URL_is_allowed(Links.First()))
                     //{
-                        //normalize the URL
-                        String newURL = URL_normalization(Links.First());
+                    //normalize the URL
+                    String newURL = URL_normalization(Links.First());
                     if (newURL.Equals(String.Empty))
                     {
                         Links.Remove(Links.First());
@@ -415,20 +426,20 @@ namespace WindowsFormsApp1
                     }
                     //check if exists in URLs to be visited or in database
                     if (!toBeVisitedURLs.Contains(newURL) && !URL_is_exist(newURL))
-                            toBeVisitedURLs.Enqueue(newURL);
+                        toBeVisitedURLs.Enqueue(newURL);
                     //}
                     Links.Remove(Links.First());
                 }
                 //if (lang == true)
                 //{
-                    //store it in database
-                    store_URL_in_database(URL);
-                    //remove from currently visiting URLs and display URL in crawled URLs
-                    currentlyVisitingURLs.Remove(URL);
-                    crawledURLs_txt.AppendText(URL + "\r\n");
-                    crawled_documents_number++;
-                    documentsNumber_txt.Clear();
-                    documentsNumber_txt.AppendText(crawled_documents_number.ToString());
+                //store it in database
+                store_URL_in_database(URL);
+                //remove from currently visiting URLs and display URL in crawled URLs
+                currentlyVisitingURLs.Remove(URL);
+                crawledURLs_txt.AppendText(URL + "\r\n");
+                crawled_documents_number++;
+                documentsNumber_txt.Clear();
+                documentsNumber_txt.AppendText(crawled_documents_number.ToString());
                 //}
                 Console.WriteLine(URL);
             }
@@ -471,7 +482,7 @@ namespace WindowsFormsApp1
                 sreader.Close();
                 myWebResponse.Close();
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine("!!!SKIP!!! => " + e.Message);
 
@@ -493,7 +504,7 @@ namespace WindowsFormsApp1
         }
 
         private void parse_robots_file(String URL)
-        {  
+        {
             //string RobotsTxtFile = "http://" + URL + "/robots.txt";
             string RobotsTxtFile = URL + "/robots.txt";
 
@@ -571,7 +582,7 @@ namespace WindowsFormsApp1
 
         private String URL_normalization(String URL)
         {
-            if(URL.Substring(0,5).Equals("about"))
+            if (URL.Substring(0, 5).Equals("about"))
             {
                 if (URL.Contains("blank"))
                     return String.Empty;
@@ -591,7 +602,7 @@ namespace WindowsFormsApp1
 
             // 4.remove fragment part'#' if exists
             int fragmentPosition = finalURL.IndexOf('#');
-            if(fragmentPosition > 0) //fragment exists
+            if (fragmentPosition > 0) //fragment exists
                 finalURL = finalURL.Substring(0, fragmentPosition);
 
             // 5.remove default port(80 for http/ 443 for https)
@@ -624,7 +635,7 @@ namespace WindowsFormsApp1
 
             if (cmd.ExecuteScalar() != null)
                 count = (Int32)cmd.ExecuteScalar();
-            con.Close(); 
+            con.Close();
 
             if (count > 0)
                 return true;
