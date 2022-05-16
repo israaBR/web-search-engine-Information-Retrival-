@@ -60,8 +60,6 @@ F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\Wi
 F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\Microsoft.mshtml.dll
 D:\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe
 D:\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.pdb
-C:\Users\Lenovo\Downloads\mygithub\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\database.mdf
-C:\Users\Lenovo\Downloads\mygithub\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\database_log.ldf
 C:\Users\Lenovo\Downloads\mygithub\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe.config
 C:\Users\Lenovo\Downloads\mygithub\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.exe
 C:\Users\Lenovo\Downloads\mygithub\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\WindowsFormsApp1.pdb
@@ -93,3 +91,6 @@ D:\FCIS\IR\engine\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.CopyComplet
 D:\FCIS\IR\engine\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe
 D:\FCIS\IR\engine\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.pdb
 D:\FCIS\IR\engine\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form2.resources
+C:\Users\Lenovo\Downloads\mygithub\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\searchEngineDatabase.mdf
+C:\Users\Lenovo\Downloads\mygithub\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\bin\Debug\searchEngineDatabase_log.ldf
+C:\Users\Lenovo\Downloads\mygithub\IR\web-search-engine-Information-Retrival-\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form2.resources

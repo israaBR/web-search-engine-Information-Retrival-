@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Data.SqlClient;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace WindowsFormsApp1
 {
     public partial class Form2 : Form
     {
+        private static SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=F:\faculty\web-search-engine-Information-Retrival-\WindowsFormsApp1\database.mdf;Integrated Security=True");
         public Form2()
         {
             InitializeComponent();
@@ -30,11 +32,13 @@ namespace WindowsFormsApp1
         private void srch_btn_Click(object sender, EventArgs e)
 
         {
-            results_list.Visible = true;
+           
             string srch_txt = search_txtbox.Text;
            
             List <string> txt_lst = tokenize(srch_txt);
             List<string> n_txt_lst = remove_stopWords(txt_lst);
+            
+            
 
         }
         private List<string> tokenize(string page_text)
@@ -122,6 +126,42 @@ namespace WindowsFormsApp1
             );
             */
             return text;
+        }
+        private void BackWithWords(List<string> nnn)
+        {
+            string cmdText = "SELECT * From tablename WHERE colnamee = @input";
+
+            using (SqlCommand cmd = new SqlCommand(cmdText, con))
+            {
+                DataSet ds ;
+                SqlDataAdapter da;
+                con.Open();
+                for (int i = 0; i < nnn.Count - 1; i++)
+                {
+                    cmd.Parameters.AddWithValue("@input", nnn.ElementAt(i));
+                    ds = new DataSet();
+                    da = new SqlDataAdapter(cmd);
+                    da.Fill(ds);
+                    dataGridView1.DataSource = ds.Tables[0];
+                }
+            }
+           
+        }
+
+
+        private void search_txtbox_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void results_list_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+
         }
     }
 }
