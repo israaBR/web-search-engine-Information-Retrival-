@@ -28,7 +28,181 @@ namespace WindowsFormsApp1
         {
 
         }
+        public Dictionary<int, int> rank_with_frequency(Dictionary<string, List<KeyValuePair<int, string>>> dectionary, List<string> words)
+        {
+            Dictionary<int, int> dic = new Dictionary<int, int>();
+            for (int m = 0; m < dectionary[words[0]].Count; m++)
+            {
+                bool find = false;
+                int count = 0;
+                List<int> index_found = new List<int>();
+                List<int> positions_of_word1 = Convert_string_to_intarr(dectionary[words[0]][m].Value);
+                List<int> positions_of_word2 = Convert_string_to_intarr(dectionary[words[1]][m].Value);
+                while (count < positions_of_word2.Count - 1)
+                {
+                    for (int z = 0; z < positions_of_word1.Count; z++)
+                    {
+                        if (positions_of_word2[count] <= positions_of_word1[z])
+                        {
+                            continue;
+                        }
+                        else if (positions_of_word2[count] - positions_of_word1[z] == 1)
+                        {
+                            index_found.Add(positions_of_word2[count]);
+                        }
 
+                    }
+                    count++;
+                }
+
+                if (dectionary.Count > 2)
+                {
+                    count = 0;
+                    for (int i = 2; i < dectionary.Count; i++)
+                    {
+                        List<int> positions_of_current_word = Convert_string_to_intarr(dectionary[words[i]][m].Value);
+                        for (int j = 0; j < index_found.Count; j++)
+                        {
+                            while (count < positions_of_current_word.Count - 1)
+                            {
+                                if (positions_of_current_word[count] <= index_found[j])
+                                {
+                                    count++;
+                                    continue;
+                                }
+                                else if (positions_of_current_word[count] - index_found[j] == 1)
+                                {
+                                    find = true;
+                                }
+                                count++;
+                            }
+                            if (!find)
+                            {
+                                index_found.RemoveAt(j);
+                            }
+                        }
+                    }
+                }
+                dic[dectionary[words[0]][m].Key] = index_found.Count;
+            }
+            return dic;
+        }
+        public List<int> Convert_string_to_intarr(string positions)
+        {
+            string num = " ";
+            List<int> arr = new List<int>();
+            for (int i = 0; i < positions.Length; i++)
+            {
+
+                if (positions[i] == ',')
+                {
+                    arr.Add(int.Parse(num));
+                    num = "";
+                    continue;
+                }
+                else
+                {
+                    num += positions[i];
+                }
+            }
+            arr.Add(int.Parse(num));
+            return arr;
+        }
+        private List<int> SmallestLength(Dictionary<string, List<KeyValuePair<int, string>>> words)
+        {
+            int length = 0;
+
+
+            List<List<KeyValuePair<int, string>>> items = new List<List<KeyValuePair<int, string>>>();
+            foreach (KeyValuePair<string, List<KeyValuePair<int, string>>> val in words)
+            {
+
+                items.Add(val.Value);
+                length++;
+            }
+            List<int> smallestLength = new List<int>();
+            for (int i = 0; i < length; i++)
+            {
+                List<KeyValuePair<int, string>> doc1 = new List<KeyValuePair<int, string>>();
+                List<KeyValuePair<int, string>> doc2 = new List<KeyValuePair<int, string>>();
+                if (i + 1 >= length)
+                {
+                    break;
+                }
+                else
+                {
+                    doc1 = items[i];
+                    doc2 = items[i + 1];
+                    int[] arr1;
+                    int[] arr2;
+                    foreach (var val in doc1)
+                    {
+                        foreach (var val2 in doc2)
+                        {
+                            if (val.Key.Equals(val2.Key))
+                            {
+                                arr1 = new int[val.Value.Length];
+                                arr2 = new int[val2.Value.Length];
+                                int j = 0;
+                                int jj = 0;
+                                foreach (var num in val.Value.Split(','))
+                                {
+                                    arr1[j] = int.Parse(num);
+                                    j++;
+                                }
+
+                                foreach (var num in val2.Value.Split(','))
+                                {
+                                    arr2[jj] = int.Parse(num);
+                                    jj++;
+                                }
+                                int small = 0;
+                                int first = 0;
+                                for (int k = 0; k < j; k++)
+                                {
+                                    if (arr1[0] < arr2[k])
+                                    {
+                                        small = arr2[k] - arr1[0];
+                                        first = k;
+                                        break;
+                                    }
+                                }
+
+                                for (int bm = 1; bm < j; bm++)
+                                {
+                                    for (int bmm = first; bmm < jj; bmm++)
+                                    {
+                                        if (arr1[bm] < arr2[bmm])
+                                        {
+                                            if (small > arr2[bmm] - arr1[bm])
+                                            {
+                                                small = arr2[bmm] - arr1[bm];
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
+                                smallestLength.Add(small);
+                                small = 0;
+
+                            }
+                        }
+                    }
+                }
+
+            }
+            int len = smallestLength.Count / (length - 1);
+
+            List<int> finalLength = new List<int>();
+            int len1 = len;
+            for (int i = 0; i < len; i++)
+            {
+                finalLength.Add(smallestLength[i] + smallestLength[len1]);
+                len1++;
+            }
+            return finalLength;
+
+        }
         private void srch_btn_Click(object sender, EventArgs e)
 
         {
