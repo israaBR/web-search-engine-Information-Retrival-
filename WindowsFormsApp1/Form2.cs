@@ -55,8 +55,22 @@ namespace WindowsFormsApp1
                 List<string> n_txt_lst = remove_stopWords(txt_lst);   //remove stop words
                 List<String> records = get_DB_records(n_txt_lst);   //get records of the terms from the dictionary
                 Dictionary<String, List<KeyValuePair<int, String>>> terms_docs_pos = get_common_docs(n_txt_lst, records);  //get common documents between the terms
-                List<int> documents_with_rank = rank_with_distance(terms_docs_pos);  //rank pages with distance
-
+                Dictionary<int, int> documents_with_dist = rank_with_distance(terms_docs_pos);  //rank pages with distance
+                //remove documents with distance 1000
+                foreach (var document in documents_with_dist.ToList())
+                {
+                    if (document.Value == 1000000)
+                        documents_with_dist.Remove(document.Key);
+                }
+                //ascendingly arrage the document in dictionary
+                var ranked_documents = from document in documents_with_dist orderby document.Value ascending select document;
+                //display URL in List View
+                /*foreach(var document in ranked_documents)
+                {
+                    String URL = get_URL_from_database(document.Key);
+                    ListViewItem item = new ListViewItem(URL);
+                    listView1.Items.Add(item);
+                }*/
             }
 
 
@@ -245,97 +259,111 @@ namespace WindowsFormsApp1
             arr.Add(int.Parse(num));
             return arr;
         }
-        private List<int> rank_with_distance(Dictionary<string, List<KeyValuePair<int, string>>> words)
+        private Dictionary<int, int> rank_with_distance(Dictionary<string, List<KeyValuePair<int, string>>> words)
         {
-            int length = 0;
+            List<List<KeyValuePair<int, string>>> terms = words.Values.ToList();
+            Dictionary<int, int> doc_dist =  new Dictionary<int, int>();
 
-            List<List<KeyValuePair<int, string>>> items = new List<List<KeyValuePair<int, string>>>();
-            foreach (KeyValuePair<string, List<KeyValuePair<int, string>>> val in words)
-            {
-                items.Add(val.Value);
-                length++;
-            }
-            List<int> smallestLength = new List<int>();
-            for (int i = 0; i < length; i++)
+            for (int i = 0; i < terms.Count - 1; i++)
             {
                 List<KeyValuePair<int, string>> doc1 = new List<KeyValuePair<int, string>>();
                 List<KeyValuePair<int, string>> doc2 = new List<KeyValuePair<int, string>>();
-                if (i + 1 >= length)
+
+                doc1 = terms[i];
+                doc2 = terms[i + 1];
+                foreach (var val in doc1)
                 {
-                    break;
-                }
-                else
-                {
-                    doc1 = items[i];
-                    doc2 = items[i + 1];
-                    int[] arr1;
-                    int[] arr2;
-                    foreach (var val in doc1)
+                    foreach (var val2 in doc2)
                     {
-                        foreach (var val2 in doc2)
+                        if (val.Key.Equals(val2.Key))
                         {
-                            if (val.Key.Equals(val2.Key))
+                            List<string> pos1 = val.Value.Split(',').ToList();
+                            List<string> pos2 = val2.Value.Split(',').ToList();
+                            int small = 1000000;
+                            int first = 0;
+
+                            for (int bm = 0; bm < pos1.Count; bm++)
                             {
-                                arr1 = new int[val.Value.Length];
-                                arr2 = new int[val2.Value.Length];
-                                int j = 0;
-                                int jj = 0;
-                                foreach (var num in val.Value.Split(','))
+                                for (int bmm = first; bmm < pos2.Count; bmm++)
                                 {
-                                    arr1[j] = int.Parse(num);
-                                    j++;
-                                }
-
-                                foreach (var num in val2.Value.Split(','))
-                                {
-                                    arr2[jj] = int.Parse(num);
-                                    jj++;
-                                }
-                                int small = 0;
-                                int first = 0;
-                                for (int k = 0; k < j; k++)
-                                {
-                                    if (arr1[0] < arr2[k])
+                                    if (int.Parse(pos1[bm]) < int.Parse(pos2[bmm]))
                                     {
-                                        small = arr2[k] - arr1[0];
-                                        first = k;
-                                        break;
-                                    }
-                                }
-
-                                for (int bm = 1; bm < j; bm++)
-                                {
-                                    for (int bmm = first; bmm < jj; bmm++)
-                                    {
-                                        if (arr1[bm] < arr2[bmm])
+                                        if (small > int.Parse(pos2[bmm]) - int.Parse(pos1[bm]))
                                         {
-                                            if (small > arr2[bmm] - arr1[bm])
-                                            {
-                                                small = arr2[bmm] - arr1[bm];
-                                                break;
-                                            }
+                                            small = int.Parse(pos2[bmm]) - int.Parse(pos1[bm]);
+                                            break;
                                         }
                                     }
                                 }
-                                smallestLength.Add(small);
-                                small = 0;
-
                             }
+                            if (small == 1000000)//the first word didn't appear before the second in the whole document
+                            {
+                                doc_dist.Add(val.Key, small);
+                                break;
+                            }
+                            else
+                                doc_dist.Add(val.Key, small);
+
+
                         }
                     }
                 }
             }
-            int len = smallestLength.Count / (length - 1);
+            return doc_dist;
+        }
+        private Dictionary<int, int> rank_with_distance2(Dictionary<string, List<KeyValuePair<int, string>>> terms, List<string> words)
+        {
+            Dictionary<int, int> document_distance = new Dictionary<int, int>();
+            Dictionary<int, List<String>> doc_pos = new Dictionary<int, List<string>>();
 
-            List<int> finalLength = new List<int>();
-            int len1 = len;
-            for (int i = 0; i < len; i++)
+
+            foreach (var term in terms.Values.ToList())
             {
-                finalLength.Add(smallestLength[i] + smallestLength[len1]);
-                len1++;
+                for (int y = 0; y < term.Count; y++)
+                {
+                    if (doc_pos.ContainsKey(term[y].Key))
+                        doc_pos[term[y].Key].Add(term[y].Value);
+                    else
+                    {
+                        List<string> positions = new List<string>();
+                        positions.Add(term[y].Value);
+                        doc_pos.Add(term[y].Key, positions);
+                    }
+                }
             }
-            return finalLength;
 
+            
+            foreach(var document in doc_pos)
+            {
+
+                for(int i=0; i<document.Value.Count-1; i++)
+                {
+                    string[] pos1 = document.Value[i].Split(',');
+                    string[] pos2 = document.Value[i+1].Split(',');
+                    int len = Math.Max(pos1.Length, pos2.Length);
+                    for(int y= 0; y< len; y++)
+                    {
+                        int p1, p2;
+                        if(y>= pos1.Length)
+                        {
+
+                        }
+                        else if(y>= pos2.Length)
+                        {
+
+                        }
+                        else
+                        {
+                            
+                        }
+                    }
+                    
+                }
+            }
+
+
+
+            return document_distance; 
         }
         private Dictionary<int, int> rank_with_frequency(Dictionary<string, List<KeyValuePair<int, string>>> dectionary, List<string> words)
         {
@@ -409,7 +437,10 @@ namespace WindowsFormsApp1
             return URL;
 
         }
-
+        private bool is_negative_one(String i)
+        {
+            return i.Equals("-1");
+        }
 
 
         private void pictureBox1_Click(object sender, EventArgs e)
