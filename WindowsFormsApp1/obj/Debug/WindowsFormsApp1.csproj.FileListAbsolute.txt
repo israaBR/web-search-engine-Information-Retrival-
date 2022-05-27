@@ -112,3 +112,4 @@ F:\faculty\web-search-engine-Information-Retrival-latest\WindowsFormsApp1\obj\De
 F:\faculty\web-search-engine-Information-Retrival-latest\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.csproj.CopyComplete
 F:\faculty\web-search-engine-Information-Retrival-latest\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.exe
 F:\faculty\web-search-engine-Information-Retrival-latest\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.pdb
+F:\faculty\web-search-engine-Information-Retrival-latest\WindowsFormsApp1\obj\Debug\WindowsFormsApp1.Form3.resources

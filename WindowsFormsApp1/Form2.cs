@@ -27,26 +27,43 @@ namespace WindowsFormsApp1
                 srch_txt = srch_txt.Substring(1, srch_txt.Length - 2);  //remove double quotes
                 List<string> txt_lst = tokenize(srch_txt);   //remove spaces, newlines and panctuations
                 List<String> records = get_DB_records(txt_lst);    //get records of the terms from the dictionary
-                Dictionary<String, List<KeyValuePair<int, String>>> terms_docs_pos = get_common_docs(txt_lst, records);  //get common documents between the terms
-                Dictionary<int, int> documents_with_freq = rank_with_frequency(terms_docs_pos, txt_lst);  //rank pages with frequency
-
-                //remove documents with ZERO frequency
-                foreach (var document in documents_with_freq.ToList())
+                IOrderedEnumerable<KeyValuePair<int, int>> ranked_documents;
+                if (txt_lst.Count == 1)
                 {
-                    if (document.Value == 0)
-                        documents_with_freq.Remove(document.Key);
+                    ranked_documents = single_word(records[0]);
                 }
-                //descendingly arrage the document in dictionary
-                var ranked_documents = from document in documents_with_freq orderby document.Value descending select document;
-
-                //display URL in List View
-                /*foreach(var document in ranked_documents)
+                else
                 {
-                    String URL = get_URL_from_database(document.Key);
-                    ListViewItem item = new ListViewItem(URL);
-                    listView1.Items.Add(item);
-                }*/
+                    Dictionary<String, List<KeyValuePair<int, String>>> terms_docs_pos = get_common_docs(txt_lst, records);  //get common documents between the terms
+                    Dictionary<int, int> documents_with_freq = rank_with_frequency(terms_docs_pos, txt_lst);  //rank pages with frequency
 
+                    //remove documents with ZERO frequency
+                    foreach (var document in documents_with_freq.ToList())
+                    {
+                        if (document.Value == 0)
+                            documents_with_freq.Remove(document.Key);
+                    }
+                    //descendingly arrage the document in dictionary
+                    ranked_documents = from document in documents_with_freq orderby document.Value descending select document;
+                }
+                //display URL in Grid view
+                DataTable URLsTable = new DataTable();
+                DataColumn dc1 = new DataColumn();
+                dc1.ColumnName= "ID";
+                DataColumn dc2 = new DataColumn();
+                dc2.ColumnName = "URL";
+
+                DataSet ds = new DataSet();
+                ds.Tables.Add(URLsTable);
+                foreach (var document in ranked_documents)
+                {
+                    URL url = get_URL_from_database(document.Key);
+                    DataRow row1 = URLsTable.NewRow();
+                    row1["ID"] = url.ID;
+                    row1["URL"] = url.url;
+                    URLsTable.Rows.Add(row1);
+                }
+                dataGridView1.DataSource = ds.DefaultViewManager;
             }
             else
             {
@@ -54,23 +71,43 @@ namespace WindowsFormsApp1
                 List<string> txt_lst = tokenize(srch_txt);   //remove spaces, newlines and panctuations
                 List<string> n_txt_lst = remove_stopWords(txt_lst);   //remove stop words
                 List<String> records = get_DB_records(n_txt_lst);   //get records of the terms from the dictionary
-                Dictionary<String, List<KeyValuePair<int, String>>> terms_docs_pos = get_common_docs(n_txt_lst, records);  //get common documents between the terms
-                Dictionary<int, int> documents_with_dist = rank_with_distance(terms_docs_pos);  //rank pages with distance
-                //remove documents with distance 1000
-                foreach (var document in documents_with_dist.ToList())
+                IOrderedEnumerable<KeyValuePair<int, int>> ranked_documents;
+                if (n_txt_lst.Count == 1)
                 {
-                    if (document.Value == 1000000)
-                        documents_with_dist.Remove(document.Key);
+                    ranked_documents = single_word(records[0]);
                 }
-                //ascendingly arrage the document in dictionary
-                var ranked_documents = from document in documents_with_dist orderby document.Value ascending select document;
-                //display URL in List View
-                /*foreach(var document in ranked_documents)
+                else
                 {
-                    String URL = get_URL_from_database(document.Key);
-                    ListViewItem item = new ListViewItem(URL);
-                    listView1.Items.Add(item);
-                }*/
+                    Dictionary<String, List<KeyValuePair<int, String>>> terms_docs_pos = get_common_docs(n_txt_lst, records);  //get common documents between the terms
+                    Dictionary<int, int> documents_with_dist = rank_with_distance(terms_docs_pos);  //rank pages with distance
+                                                                                                    //remove documents with distance 1000
+                    foreach (var document in documents_with_dist.ToList())
+                    {
+                        if (document.Value == 1000000)
+                            documents_with_dist.Remove(document.Key);
+                    }
+                    //ascendingly arrage the document in dictionary
+                    ranked_documents = from document in documents_with_dist orderby document.Value ascending select document;
+                }
+                //display URL in Grid view
+                DataTable URLsTable = new DataTable();
+                DataColumn dc1 = new DataColumn();
+                dc1.ColumnName = "ID";
+                DataColumn dc2 = new DataColumn();
+                dc2.ColumnName = "URL";
+                URLsTable.Columns.Add(dc1);
+                URLsTable.Columns.Add(dc2);
+                DataSet ds = new DataSet();
+                ds.Tables.Add(URLsTable);
+                foreach (var document in ranked_documents)
+                {
+                    URL url = get_URL_from_database(document.Key);
+                    DataRow row1 = URLsTable.NewRow();
+                    row1["ID"] = url.ID;
+                    row1["URL"] = url.url;
+                    URLsTable.Rows.Add(row1);
+                }
+                dataGridView1.DataSource = ds.Tables[0];
             }
 
 
@@ -182,6 +219,25 @@ namespace WindowsFormsApp1
                 records.Add(row["document_id"].ToString());
             return records;
         }
+        private IOrderedEnumerable<KeyValuePair<int, int>> single_word(String record)
+        {
+            Dictionary<int, int>doc_freq = new Dictionary<int, int>();
+            //split the record
+            String[] documents = record.Split(';');
+            foreach (String document in documents)
+            {
+                if (document != "")
+                {
+                    String[] doc_freq_pos = document.Split(':');
+                    int doc_id = Convert.ToInt32(doc_freq_pos[0]);
+                    int freq = Convert.ToInt32(doc_freq_pos[1]);
+                    doc_freq.Add(doc_id, freq);
+                }
+            }
+            //arrange documents descendingly with frequency 
+            var ranked_documents = from document in doc_freq orderby document.Value descending select document;
+            return ranked_documents;
+        }
         private List<int> intersection_of_lists(List<int> list1, List<int> list2)
         {
             List<int> intersection = list1.Intersect(list2).ToList();
@@ -189,7 +245,6 @@ namespace WindowsFormsApp1
         }
         private Dictionary<String, List<KeyValuePair<int, String>>> get_common_docs(List<String> terms, List<String> records)
         {
-            //Dictionary<String, List<KeyValuePair<int, String>>> initial_docs = new Dictionary<String, List<KeyValuePair<int, String>>>();
             List<int> intersection = new List<int>();
             Dictionary<String, List<KeyValuePair<int, String>>> common_docs = new Dictionary<String, List<KeyValuePair<int, String>>>();
             for (int i = 0; i < records.Count; i++)
@@ -298,11 +353,16 @@ namespace WindowsFormsApp1
                             }
                             if (small == 1000000)//the first word didn't appear before the second in the whole document
                             {
-                                doc_dist.Add(val.Key, small);
+                                if (!doc_dist.ContainsKey(val.Key))
+                                    doc_dist.Add(val.Key, small);
+
                                 break;
                             }
                             else
-                                doc_dist.Add(val.Key, small);
+                            {
+                                if(!doc_dist.ContainsKey(val.Key))
+                                    doc_dist.Add(val.Key, small);
+                            }
 
 
                         }
@@ -310,60 +370,6 @@ namespace WindowsFormsApp1
                 }
             }
             return doc_dist;
-        }
-        private Dictionary<int, int> rank_with_distance2(Dictionary<string, List<KeyValuePair<int, string>>> terms, List<string> words)
-        {
-            Dictionary<int, int> document_distance = new Dictionary<int, int>();
-            Dictionary<int, List<String>> doc_pos = new Dictionary<int, List<string>>();
-
-
-            foreach (var term in terms.Values.ToList())
-            {
-                for (int y = 0; y < term.Count; y++)
-                {
-                    if (doc_pos.ContainsKey(term[y].Key))
-                        doc_pos[term[y].Key].Add(term[y].Value);
-                    else
-                    {
-                        List<string> positions = new List<string>();
-                        positions.Add(term[y].Value);
-                        doc_pos.Add(term[y].Key, positions);
-                    }
-                }
-            }
-
-            
-            foreach(var document in doc_pos)
-            {
-
-                for(int i=0; i<document.Value.Count-1; i++)
-                {
-                    string[] pos1 = document.Value[i].Split(',');
-                    string[] pos2 = document.Value[i+1].Split(',');
-                    int len = Math.Max(pos1.Length, pos2.Length);
-                    for(int y= 0; y< len; y++)
-                    {
-                        int p1, p2;
-                        if(y>= pos1.Length)
-                        {
-
-                        }
-                        else if(y>= pos2.Length)
-                        {
-
-                        }
-                        else
-                        {
-                            
-                        }
-                    }
-                    
-                }
-            }
-
-
-
-            return document_distance; 
         }
         private Dictionary<int, int> rank_with_frequency(Dictionary<string, List<KeyValuePair<int, string>>> dectionary, List<string> words)
         {
@@ -424,18 +430,31 @@ namespace WindowsFormsApp1
             }
             return dic;
         }
-        private String get_URL_from_database(int doc_id)
+        private URL get_URL_from_database(int doc_id)
         {
-            String URL = String.Empty;
+            URL url = new URL();
+
             con.Open();
-            SqlCommand cmd = con.CreateCommand();
-            cmd.CommandText = "select _url from URLData where Id = '" + doc_id + "'";
+            string cmd = @" SELECT * FROM URLData where Id = @id";
+            using (SqlCommand comm = new SqlCommand(cmd, con))
+            {
+                comm.Parameters.AddWithValue("@id", doc_id);
 
-            if (cmd.ExecuteScalar() != null)
-                URL = (string)cmd.ExecuteScalar();
+
+                using (SqlDataReader oReader = comm.ExecuteReader())
+                {
+                    while (oReader.Read())
+                    {
+                        url.ID = int.Parse(oReader["Id"].ToString());
+                        url.url = oReader["_url"].ToString();
+                    }
+
+                    con.Close();
+                }
+            }          
+          
             con.Close();
-            return URL;
-
+            return url;
         }
         private bool is_negative_one(String i)
         {
@@ -463,5 +482,10 @@ namespace WindowsFormsApp1
         {
 
         }
+    }
+    class URL
+    {
+        public int ID;
+        public String url;
     }
 }
